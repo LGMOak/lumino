@@ -2,7 +2,7 @@
 Description here
 
 ## Library Requirements
-python v3.12
-pytorch
-flask
-OpenAI Whisper
+- python v3.12
+- pytorch
+- OpenAI Whisper
+- Flask
