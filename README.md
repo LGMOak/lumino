@@ -6,4 +6,3 @@ Description here
 - pytorch
 - OpenAI Whisper
 - Flask
-- Flask-Bootstrap
