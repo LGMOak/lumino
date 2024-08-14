@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} Welcome to Lumino {% endblock %}</h1>
+{% for entry in info %}
+<a href="#">
+    <h2>{{ entry['title'] }}</h2>
+</a>
+<span class="badge badge-primary">{{ entry['created'] }}</span>
+<hr>
+{% endfor %}
+{% endblock %}

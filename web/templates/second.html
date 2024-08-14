@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} Welcome to Lumino {% endblock %}</h1>
+<form action="/hello" method="post">
+    <input type="text" name="name" placeholder="Enter your name" required>
+    <button type="submit">Submit</button>
+</form>
+
+{% endblock %}
