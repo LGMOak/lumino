@@ -118,6 +118,11 @@ h1 {
     font-size: 1.1rem;
     transition: all 0.3s ease;
     min-height: 200px;
+<<<<<<< HEAD
     resize: none;  /* Prevent manual resizing */
     overflow: hidden; /* Ensure the scrollbar is hidden */
+=======
+    resize: none;  
+    overflow: hidden; 
+>>>>>>> f685d707475d4f07b753466205ba4415bcd41ce7
 }
