@@ -1,12 +1,46 @@
 {% extends 'base.html' %}
 
-{% block content %}
-<h1>{% block title %} Welcome to Lumino {% endblock %}</h1>
-{% for entry in info %}
-<a href="#">
-    <h2>{{ entry['title'] }}</h2>
-</a>
-<span class="badge badge-primary">{{ entry['created'] }}</span>
-<hr>
-{% endfor %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 {% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+            <div class="card p-4 shadow-lg rounded-lg">
+                <div class="row">
+                    <!-- Input Section -->
+                    <div class="col-12 col-md-6 position-relative border-right">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <select id="input-language" class="form-select form-select-lg mb-3 custom-select">
+                                <option value="auto">Detect Language</option>
+                                <option value="en">English</option>
+                                <option value="es">Spanish</option>
+                                <option value="de">German</option>
+                            </select>
+                            <button class="btn btn-light mic-btn mic-btn-icon"><i class="bi bi-mic-fill"></i></button>
+                        </div>
+                        <textarea id="input-textarea" class="form-control custom-textarea" rows="5" placeholder="Enter text and start translating."></textarea>
+                    </div>
+
+                    <!-- Output Section -->
+                    <div class="col-12 col-md-6 position-relative">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <select id="output-language" class="form-select form-select-lg mb-3 custom-select">
+                                <option value="en">English</option>
+                                <option value="zh">Chinese (Simplified)</option>
+                                <option value="de">German</option>
+                                <option value="es">Spanish</option>
+                            </select>
+                        </div>
+                        <div class="translation-result">Translation will appear here</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

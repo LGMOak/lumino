@@ -4,3 +4,120 @@ h1 {
     text-align: center;
     padding: 10px;
 }
+
+/* Container styling */
+.container {
+    max-width: 100%;
+    width: 90%;
+    max-height: auto;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Card styling */
+.card {
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    width: calc(100% - 60px);
+}
+
+/* Input and Output container styling */
+.col-md-6 {
+    padding: 20px;
+}
+
+/* Custom select styling */
+.custom-select {
+    font-size: 1rem;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 0.5rem;
+    background-color: #f9f9f9;
+    transition: all 0.3s ease;
+    width: 100%; 
+    max-width: 300px; 
+}
+
+.custom-select:hover, .custom-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);
+}
+
+
+/* Custom textarea styling */
+.custom-textarea {
+    border-radius: 8px;
+    border: 2px solid #ddd;
+    background-color: #f9f9f9;
+    padding: 15px;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    min-height: 200px;
+    resize: none;
+}
+
+.custom-textarea:hover, .custom-textarea:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);
+}
+
+/* Mic button styling */
+.mic-btn-icon {
+    font-size: 1.5rem;
+    color: #007bff;
+    border: none;
+    background-color: #f9f9f9;
+    transition: transform 0.2s ease, color 0.2s ease;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-left: 10px;
+}
+
+.mic-btn-icon:hover {
+    transform: scale(1.1);
+    color: #0056b3;
+    background-color: #e9e9e9;
+}
+
+
+/* Translation result styling */
+.translation-result {
+    padding: 15px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    background-color: #f7f7f7;
+    min-height: 200px;
+    font-size: 1.1rem;
+    color: #333;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .col-md-6 {
+        border-right: none;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+    }
+    .mic-btn {
+        font-size: 1.5rem;
+    }
+}
+
+.custom-textarea {
+    border-radius: 8px;
+    border: 2px solid #ddd;
+    background-color: #f9f9f9;
+    padding: 15px;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    min-height: 200px;
+    resize: none;  /* Prevent manual resizing */
+    overflow: hidden; /* Ensure the scrollbar is hidden */
+}
