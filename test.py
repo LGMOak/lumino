@@ -1,8 +1,10 @@
 from translate import translate
 
+
+
 #expect: Hola, esto es una prueba.
 #works
-print(translate('en', 'es', 'Hello, this is a test.'))
+print(translate(source='en', target='es', text='Hello, this is a test.'))
 
 #expect: How are you? This is a test.
 #works
