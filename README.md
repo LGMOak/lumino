@@ -6,3 +6,7 @@ Description here
 - pytorch
 - OpenAI Whisper
 - Flask
+- SpeechRecognition[whisper-local]
+- setuptools
+- pyaudio
+- deep-translator
