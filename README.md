@@ -9,3 +9,4 @@ Description here
 - SpeechRecognition[whisper-local]
 - setuptools
 - pyaudio
+- deep-translator
