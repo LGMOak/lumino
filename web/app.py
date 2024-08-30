@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request
 import sqlite3
+import lumino
 
 app = Flask(__name__)
 
@@ -15,6 +16,7 @@ def index():
     conn = get_db_connection()
     info = conn.execute('SELECT * FROM info').fetchall()
     conn.close()
+    speech_txt = lumino.Lumino()
     return render_template('index.html', info=info)
 
 
