@@ -2,7 +2,9 @@
 Description here
 
 ## Library Requirements
+```python
 pip install -r requirements.txt
+```
 
 Lumino makes use of:
 - python v3.12
