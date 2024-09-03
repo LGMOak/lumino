@@ -2,6 +2,9 @@
 Description here
 
 ## Library Requirements
+pip install -r requirements.txt
+
+Lumino makes use of:
 - python v3.12
 - pytorch
 - OpenAI Whisper

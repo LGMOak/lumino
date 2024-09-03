@@ -40,7 +40,7 @@ class Lumino:
             except sr.RequestError:
                 return "Request results error"
             except Exception:
-                return None
+                return "An error occurred"
 
 
 if __name__ == "__main__":

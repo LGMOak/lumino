@@ -36,9 +36,9 @@ def __deeptranslate(source=None, target='en-us', text='', context=None, split_se
 
 # Current translator in use. Typically set to Google Translate to avoid spending character tokens.
 # Only import this translate function.
-def translate(source=None, target='en-us', text='', context=None, split_sentences=0, preserve_formatting=False, formality='prefer_less',glossary_id=None):
+def translate(source=None, target='en', text='', context=None, split_sentences=0, preserve_formatting=False, formality='prefer_less',glossary_id=None):
     if model == 'google':
-        return __googletranslate(source=source, target=target, text=text)
+        return __googletranslate(source='auto', target=target, text=text)
     elif model == 'deepl':
         return __deeptranslate(source=source, target=target, text=text, context=context, split_sentences=split_sentences, preserve_formatting=preserve_formatting, formality=formality,glossary_id=glossary_id)
     else:
