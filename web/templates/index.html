@@ -41,6 +41,36 @@
         </div>
     </div>
 </div>
+<script>
+    // Function to send a POST request to the server to translate the text
+    document.getElementById("mic-btn").addEventListener("click", function() {
+        // Should not be able to click the button while the translation is in progress
+        document.getElementById("mic-btn").disabled = true;
+        document.getElementById("translated-text").innerHTML = "Listening...";
+    
+        // Send a POST request to the server to start the translation
+        fetch('/translate', {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById("translated-text").innerHTML = data.translation; // Update the translation
+            } else {
+                document.getElementById("translated-text").innerHTML = "Failed to translate speech."; // Show an error message if any
+            }
+        })
+        // Catch any errors and log them to the console
+        .catch(error => {
+            console.error("Error during translation:", error); 
+            document.getElementById("translated-text").innerHTML = "Error occurred during translation.";
+        })
+        .finally(() => {
+            // Enable the button after the translation is complete
+            document.getElementById("mic-btn").disabled = false;
+        });
+    });
+    </script>
 {% endblock %}
 
 
