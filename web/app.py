@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import sqlite3
 import lumino
+import sys
 
 app = Flask(__name__)
 
@@ -29,6 +30,19 @@ def about():
 def hello():
     name = request.form['name']
     return render_template('hello.html', name=name)
+
+# API endpoint to return translated  text
+@app.route('/translate', methods=['POST'])
+def translate():
+    lumino = Lumino()
+    recognized_text = lumino.speech_recog()
+
+    if recognized_text and recognized_text.strip():
+        translated_text = lumino.translate(text=recognized_text)
+        # Return a JSON response 
+        return jsonify(success=True, translation=translated_text)
+    else:
+        return jsonify(success=False, error="Speech recognition failed")
 
 
 if __name__ == '__main__':
