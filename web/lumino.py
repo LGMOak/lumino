@@ -1,5 +1,7 @@
 import speech_recognition as sr
 import os
+from queue import Queue
+from threading import Thread
 from deep_translator import GoogleTranslator
 from deepl import Translator
 
@@ -11,39 +13,59 @@ class Lumino:
         # self.model = 'deepl'
         self.recognizer = sr.Recognizer()
 
+        # queue for audio stream; list for text result
+        self.audio_queue = Queue()
+        self.speech_text = []
+
+    def speech_to_text(self):
+        # start a new thread to recognize audio, while this thread focuses on listening
+        recognize_thread = Thread(target=self.__speech_recog)
+        recognize_thread.daemon = True
+        recognize_thread.start()
+
+        with sr.Microphone() as source:
+            try:
+                print("Adjusting noise...")
+                self.recognizer.adjust_for_ambient_noise(source, duration=1)
+                print("Recording...")
+                while True:  # repeatedly listen for phrases and put the resulting audio on the audio processing job queue
+                    self.audio_queue.put(self.recognizer.listen(source))
+            except KeyboardInterrupt:  # allow Ctrl + C to shut down the program
+                print("\nInterrupted")
+                # print(self.speech_text)
+                return self.speech_text
+
     def translate(self, source='en', target='zh-CN', text=''):
         # https://pypi.org/project/deep-translator/#google-translate-1
         return GoogleTranslator(source=source, target=target).translate(text)
 
-    def speech_recog(self):
-        # List available microphones (optional)
-        print("Available microphones:")
-        print(sr.Microphone.list_microphone_names())
+    def __speech_recog(self):
+        # this runs in a background thread
+        while True:
+            audio = self.audio_queue.get()  # retrieve the next audio processing job from the main thread
+            if audio is None:
+                break  # stop processing if the main thread is done
 
-        # Select a specific microphone (optional)
-        # with sr.Microphone(device_index=1) as source:
-
-        with sr.Microphone() as source:
-            print("Adjusting noise...")
-            self.recognizer.adjust_for_ambient_noise(source, duration=1)
-            print("Recording for 4 seconds...")
-            recorded_audio = self.recognizer.listen(source, timeout=4)
-            print("Done recording.")
-
+            # received audio data, now we'll recognize it using Google Speech Recognition
             try:
-                print("Recognizing the text...")
-                text = self.recognizer.recognize_whisper(recorded_audio, language="en", model="small")
-                print("Decoded Text: {}".format(text))
-                return text
-            except sr.UnknownValueError:
-                return "Could not understand the audio."
-            except sr.RequestError:
-                return "Request results error"
-            except Exception:
-                return "An error occurred"
+                # for testing purposes, we're just using the default API key
+                # to use another API key, use `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
+                # instead of `r.recognize_google(audio)`
+                text = self.recognizer.recognize_whisper(audio)
+                print(text)
+                self.speech_text.append(text)
+                # print(self.translate(text=text))
+
+            except sr.UnknownValueError as uve:
+                self.speech_text.append(uve)
+            except sr.RequestError as e:
+                return self.speech_text.append(e)
+            finally:
+                self.audio_queue.task_done()  # mark the audio processing job as completed in the queue
 
 
 if __name__ == "__main__":
     lum = Lumino()
-    txt = lum.speech_recog()
+    txt = ''.join(lum.speech_to_text())
+    print(txt)
     print(lum.translate(text=txt))
