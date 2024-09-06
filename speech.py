@@ -57,7 +57,7 @@ class Lumino:
             self.audio_queue.put(data)
 
         print("Recording...")
-        self.recognizer.listen_in_background(self.source, transcript_data, phrase_time_limit=self.line_timeout)
+        self.recognizer.listen_in_background(self.source, transcript_data, phrase_time_limit=self.record_timeout)
 
         # audio data in bytes
         audio_data = b''
