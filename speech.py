@@ -46,8 +46,8 @@ class Lumino:
         with self.source:
             self.recognizer.adjust_for_ambient_noise(self.source, duration=1)
 
-    def speech(self):
-        def speech_data(r, audio_data: sr.AudioData):
+    def speech_recognition(self):
+        def transcript_data(r, audio_data: sr.AudioData):
             """
             Get the audio data line-by-line and add to queue
             :param audio_data: incoming audio stream
@@ -56,7 +56,8 @@ class Lumino:
             data = audio_data.get_raw_data()
             self.audio_queue.put(data)
 
-        self.recognizer.listen_in_background(self.source, speech_data, phrase_time_limit=self.line_timeout)
+        print("Recording...")
+        self.recognizer.listen_in_background(self.source, transcript_data, phrase_time_limit=self.line_timeout)
 
         # audio data in bytes
         audio_data = b''
@@ -93,15 +94,13 @@ class Lumino:
 
                     os.system('clear' if os.name == 'posix' else 'cls')
                     yield text
-                    # for line in self.speech_text:
-                    #     print(line)
-                    # print('', end='', flush=True)
+
             except KeyboardInterrupt:
                 return self.speech_text
 
 
 if __name__ == "__main__":
     l = Lumino()
-    for line in l.speech():
+    for line in l.speech_recognition():
         print(line)
 
