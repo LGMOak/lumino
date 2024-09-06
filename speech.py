@@ -11,50 +11,52 @@ from queue import Queue
 
 
 class Lumino:
-    def main(self):
+
+    def __init__(self):
         # Time when a spoken line was taken fom queue
-        line_time = None
+        self.line_time = None
 
-        audio_queue = Queue()
+        self.audio_queue = Queue()
 
-        recognizer = sr.Recognizer()
-        recognizer.dynamic_energy_threshold = False
+        self.recognizer = sr.Recognizer()
+        self.recognizer.dynamic_energy_threshold = False
 
         # common linux bug
-        source = None
+        self.source = None
         if 'linux' in sys.platform:
             mic_name = "pulse"
             for i, mic in enumerate(sr.Microphone.list_microphone_names()):
                 if mic_name in mic:
-                    source = sr.Microphone(sample_rate=16000, device_index=i)
+                    self.source = sr.Microphone(sample_rate=16000, device_index=i)
                     break
         else:
-            source = sr.Microphone()
+            self.source = sr.Microphone()
 
         # Load / Download model
-        audio_model = whisper.load_model("small")
+        self.audio_model = whisper.load_model("small")
 
         # How real time the recording is in seconds.
-        record_timeout = 2
+        self.record_timeout = 2
         # How much empty space between recordings before we consider it a new line in the transcription.
-        line_timeout = 3
+        self.line_timeout = 3
 
-        speech_text = ['']
+        self.speech_text = ['']
 
         print("Adjusting noise...")
-        with source:
-            recognizer.adjust_for_ambient_noise(source, duration=1)
+        with self.source:
+            self.recognizer.adjust_for_ambient_noise(self.source, duration=1)
 
-        def recognise(r, audio_data: sr.AudioData):
+    def speech(self):
+        def speech_data(r, audio_data: sr.AudioData):
             """
             Get the audio data line-by-line and add to queue
             :param audio_data: incoming audio stream
             :return:
             """
             data = audio_data.get_raw_data()
-            audio_queue.put(data)
+            self.audio_queue.put(data)
 
-        recognizer.listen_in_background(source, recognise, phrase_time_limit=line_timeout)
+        self.recognizer.listen_in_background(self.source, speech_data, phrase_time_limit=self.line_timeout)
 
         # audio data in bytes
         audio_data = b''
@@ -63,40 +65,43 @@ class Lumino:
             try:
                 start = time.time()
 
-                if not audio_queue.empty():
+                if not self.audio_queue.empty():
                     line_end = False
                     # line ends when 3s has passed
-                    if time.time() - start > line_timeout:
+                    if time.time() - start > self.line_timeout:
                         line_end = True
                         # new audio data -> new line
                         audio_data = b''
                     line_time = start
 
                     # combine audio data
-                    audio_data = audio_data + b''.join(audio_queue.queue)
-                    audio_queue.queue.clear()
+                    audio_data = audio_data + b''.join(self.audio_queue.queue)
+                    self.audio_queue.queue.clear()
 
                     # numpy torch audio data stuff
                     audio_np = np.frombuffer(audio_data, dtype=np.int16).astype(np.float32) / 32768.0
 
                     # Read the transcription.
-                    result = audio_model.transcribe(audio_np, fp16=torch.cuda.is_available())
+                    result = self.audio_model.transcribe(audio_np, fp16=torch.cuda.is_available())
                     text = result['text'].strip()
 
                     # either add new line or edit last line
                     if line_end:
-                        speech_text.append(text)
+                        self.speech_text.append(text)
                     else:
-                        speech_text[-1] = text
+                        self.speech_text[-1] = text
 
-                    os.system('cls' if os.name == 'nt' else 'clear')
-                    for line in speech_text:
-                        print(line)
-                    print('', end='', flush=True)
+                    os.system('clear' if os.name == 'posix' else 'cls')
+                    yield text
+                    # for line in self.speech_text:
+                    #     print(line)
+                    # print('', end='', flush=True)
             except KeyboardInterrupt:
-                break
+                return self.speech_text
 
 
 if __name__ == "__main__":
-    lum = Lumino()
-    lum.main()
+    l = Lumino()
+    for line in l.speech():
+        print(line)
+
