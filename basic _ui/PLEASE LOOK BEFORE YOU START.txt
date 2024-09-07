@@ -1,0 +1,17 @@
+You need install npm via terminal, then you can access this web record function
+
+npm install
+
+When you open the recordUI.html
+
+If you want to test whether the "Record" button work or not
+
+You should run this command first: 
+
+node proxyServer.js
+
+Then, start click the "Record" button
+
+Speak English 
+
+The translate result will directly display as Chinese, and it will show in the webUI.html
