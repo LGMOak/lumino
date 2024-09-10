@@ -5,72 +5,97 @@
 {% endblock %}
 
 {% block content %}
-<div class="container my-5">
-    <div class="row justify-content-center">
-        <div class="col-12 col-lg-10">
-            <div class="card p-4 shadow-lg rounded-lg">
-                <div class="row">
-                    <!-- Input Section -->
-                    <div class="col-12 col-md-6 position-relative border-right">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <select id="input-language" class="form-select form-select-lg mb-3 custom-select">
-                                <option value="auto">Detect Language</option>
-                                <option value="en">English</option>
-                                <option value="es">Spanish</option>
-                                <option value="de">German</option>
-                            </select>
-                            <button class="btn btn-light mic-btn mic-btn-icon"><i class="bi bi-mic-fill"></i></button>
-                        </div>
-                        <textarea id="input-textarea" class="form-control custom-textarea" rows="5" placeholder="Enter text and start translating."></textarea>
-                    </div>
+<body class="webUI">
+    <!-- dynamic update the content -->
+    <div class="chat"></div>
 
-                    <!-- Output Section -->
-                    <div class="col-12 col-md-6 position-relative">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <select id="output-language" class="form-select form-select-lg mb-3 custom-select">
-                                <option value="en">English</option>
-                                <option value="zh">Chinese (Simplified)</option>
-                                <option value="de">German</option>
-                                <option value="es">Spanish</option>
-                            </select>
-                        </div>
-                        <div class="translation-result">Translation will appear here</div>
-                    </div>
-                </div>
-            </div>
+    <!-- Footer  -->
+    <div class="footer">
+        <div class="selection">
+            <button id="scenario">Scenario</button>
         </div>
+        <button id="mic-btn" class="btn btn-primary mic-btn-icon mx-2">
+            <i class="bi bi-mic-fill"></i> Start
+        </button>
+        <button id="clearConversation">Clear</button>
     </div>
-</div>
+</body>
+
 <script>
-    // Function to send a POST request to the server to translate the text
-    document.getElementById("mic-btn").addEventListener("click", function() {
-        // Should not be able to click the button while the translation is in progress
-        document.getElementById("mic-btn").disabled = true;
-        document.getElementById("translated-text").innerHTML = "Listening...";
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get references to critical elements
+        const micBtn = document.getElementById("mic-btn");
+        const chatWindow = document.querySelector('.chat'); // Assuming .chat is the class for your chat window container
     
-        // Send a POST request to the server to start the translation
-        fetch('/translate', {
-            method: 'POST'
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById("translated-text").innerHTML = data.translation; // Update the translation
-            } else {
-                document.getElementById("translated-text").innerHTML = "Failed to translate speech."; // Show an error message if any
-            }
-        })
-        // Catch any errors and log them to the console
-        .catch(error => {
-            console.error("Error during translation:", error); 
-            document.getElementById("translated-text").innerHTML = "Error occurred during translation.";
-        })
-        .finally(() => {
-            // Enable the button after the translation is complete
-            document.getElementById("mic-btn").disabled = false;
+        // Check if critical elements exist; log error and return if not
+        if (!micBtn || !chatWindow) {
+            console.error("Critical elements missing on the page!");
+            return;
+        }
+    
+        // Add click event listener to microphone button
+        micBtn.addEventListener("click", function() {
+            this.disabled = true; // Disable the mic button while processing
+    
+            console.log("Sending request to backend...");
+    
+            // Send POST request to '/translate' endpoint
+            fetch('/translate', { method: 'POST' })
+            .then(response => {
+                console.log("Received response:", response);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok: ' + response.statusText);
+                }
+                return response.json(); // Parse response as JSON
+            })
+            .then(data => {
+                console.log("Data received:", data);
+                // Check if translation was successful
+                if (data.success) {
+                    console.log("Attempting to add messages to the chat window...");
+                    // Add recognized and translated messages to the chat window
+                    addChatMessage(data.recognized_text, data.translated_text);
+                } else {
+                    console.log("Data success flag is false or data missing important fields.");
+                    // Add error message to chat window if translation fails
+                    addChatMessage("Error", data.error || "No specific error message provided.");
+                }
+            })
+            .catch(error => {
+                console.error("Fetch error:", error);
+                // Add fetch error message to chat window on error
+                addChatMessage("Fetch error", error.message);
+            })
+            .finally(() => {
+                this.disabled = false; // Re-enable mic button after request completes
+            });
         });
+    
+        // Function to add messages to the chat window
+        function addChatMessage(recognizedText, translatedText) {
+            console.log("Adding messages: ", recognizedText, translatedText);
+    
+            // Create a div element for user message (recognized text)
+            const userMessage = document.createElement('div');
+            userMessage.classList.add('message', 'user'); // Add CSS classes 'message' and 'user' to style the message
+            userMessage.textContent = 'Recognized: ' + recognizedText; // Display recognized text
+    
+            // Append user message to the chat window
+            chatWindow.appendChild(userMessage);
+    
+            // Create a div element for bot message (translated text)
+            const botMessage = document.createElement('div');
+            botMessage.classList.add('message', 'computer'); // Add CSS classes 'message' and 'computer' for styling
+            botMessage.textContent = 'Translated: ' + translatedText; // Display translated text
+    
+            // Append bot message to the chat window
+            chatWindow.appendChild(botMessage);
+    
+            // Scroll chat window to the bottom to show latest messages
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
     });
-    </script>
+</script>
 {% endblock %}
 
 
