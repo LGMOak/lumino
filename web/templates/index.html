@@ -95,6 +95,19 @@
             chatWindow.scrollTop = chatWindow.scrollHeight;
         }
     });
+
+    document.getElementById('clearConversation').addEventListener('click', function() {
+    // Clear local storage history
+        localStorage.removeItem('conversation');
+
+        // Clear the chat container content
+        const chatContainer = document.querySelector('.chat');
+        if (chatContainer) {
+            chatContainer.innerHTML = '';  // Clear the content of the chat container
+        } else {
+            console.error('Chat container not found');
+        }
+    });
 </script>
 {% endblock %}
 
