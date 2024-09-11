@@ -7,7 +7,6 @@ from threading import Thread, Event
 import queue
 
 app = Flask(__name__)
-lumino = Lumino()
 
 def get_db_connection():
     conn = sqlite3.connect('database.db')
@@ -67,6 +66,5 @@ def translate():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
-    app.run()
+    app.run(debug=True, threaded=True)
 
