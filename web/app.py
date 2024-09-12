@@ -1,12 +1,10 @@
 from flask import Flask, render_template, request, jsonify
 import sqlite3
 from lumino import Lumino
-import time
-import sys
-from threading import Thread, Event
-import queue
 
 app = Flask(__name__)
+
+lumino_instance = None
 
 def get_db_connection():
     conn = sqlite3.connect('database.db')
@@ -35,33 +33,33 @@ def hello():
 
 
 
-def run_speech_to_text(lumino):
-    lumino.speech_to_text()  
-
 @app.route('/translate', methods=['POST'])
 def translate():
-    lumino = Lumino()
-    # New thread to run speech_to_text
-    thread = Thread(target=run_speech_to_text, args=(lumino,))
-    thread.start()
-    thread.join(timeout=15)  # wait for 15 seconds for the thread to finish, can be adjusted
+    global lumino_instance
+    try:
+        # Check if an instance already exists, if not, create one
+        if lumino_instance is None:
+            lumino_instance = Lumino()
+            
 
-    if lumino.speech_text:
-        # If there is a recognized text
-        for recognized_text, translated_text  in lumino.speech_recognition():
-            response_data = {
-                'success': True,
-                'recognized_text': recognized_text,
-                'translated_text': translated_text
-            }
-    else:
-        # If no speech detected or timeout
-        response_data = {
+        text, translation = next(lumino_instance.speech_recognition())
+        return jsonify({
+            'success': True,
+            'recognized_text': text,
+            'translated_text': translation
+        })
+    except StopIteration:
+        
+        lumino_instance = None
+        return jsonify({
             'success': False,
-            'error': 'Timeout or no speech detected'
-        }
-
-    return jsonify(response_data)
+            'error': 'Recognition completed or needs to be restarted.'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        })
 
 
 if __name__ == '__main__':
