@@ -48,13 +48,12 @@ def translate():
 
     if lumino.speech_text:
         # If there is a recognized text
-        recognized_text = ''.join(lumino.speech_text)
-        translated_text = lumino.translate(text=recognized_text)
-        response_data = {
-            'success': True,
-            'recognized_text': recognized_text,
-            'translated_text': translated_text
-        }
+        for recognized_text, translated_text  in lumino.speech_recognition():
+            response_data = {
+                'success': True,
+                'recognized_text': recognized_text,
+                'translated_text': translated_text
+            }
     else:
         # If no speech detected or timeout
         response_data = {

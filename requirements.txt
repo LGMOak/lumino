@@ -1,7 +1,9 @@
-deep_translator==1.11.4
-deepl==1.18.0
 Flask==3.0.3
 SpeechRecognition==3.10.4
-SpeechRecognition[whisper-local]
 setuptools==74.1.0
 pyaudio==0.2.14
+deep_translator==1.11.4
+deepl==1.18.0
+numpy==2.1.1
+openai_whisper==20231117
+torch==2.3.1
