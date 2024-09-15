@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content %}
-<body class="webUI">
+<body>
     <!-- dynamic update the content -->
     <div class="chat"></div>
 
@@ -21,81 +21,8 @@
     </div>
 </body>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Get references to critical elements
-        const micBtn = document.getElementById("mic-btn");
-        const chatWindow = document.querySelector('.chat'); // Assuming .chat is the class for your chat window container
-    
-        // Check if critical elements exist; log error and return if not
-        if (!micBtn || !chatWindow) {
-            console.error("Critical elements missing on the page!");
-            return;
-        }
-    
-        // Add click event listener to microphone button
-        micBtn.addEventListener("click", function() {
-            this.disabled = true; // Disable the mic button while processing
-    
-            console.log("Sending request to backend...");
-    
-            // Send POST request to '/translate' endpoint
-            fetch('/translate', { method: 'POST' })
-            .then(response => {
-                console.log("Received response:", response);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok: ' + response.statusText);
-                }
-                return response.json(); // Parse response as JSON
-            })
-            .then(data => {
-                console.log("Data received:", data);
-                // Check if translation was successful
-                if (data.success) {
-                    console.log("Attempting to add messages to the chat window...");
-                    // Add recognized and translated messages to the chat window
-                    addChatMessage(data.recognized_text, data.translated_text);
-                } else {
-                    console.log("Data success flag is false or data missing important fields.");
-                    // Add error message to chat window if translation fails
-                    addChatMessage("Error", data.error || "No specific error message provided.");
-                }
-            })
-            .catch(error => {
-                console.error("Fetch error:", error);
-                // Add fetch error message to chat window on error
-                addChatMessage("Fetch error", error.message);
-            })
-            .finally(() => {
-                this.disabled = false; // Re-enable mic button after request completes
-            });
-        });
-    
-        // Function to add messages to the chat window
-        function addChatMessage(recognizedText, translatedText) {
-            console.log("Adding messages: ", recognizedText, translatedText);
-    
-            // Create a div element for user message (recognized text)
-            const userMessage = document.createElement('div');
-            userMessage.classList.add('message', 'user'); // Add CSS classes 'message' and 'user' to style the message
-            userMessage.textContent = 'Recognized: ' + recognizedText; // Display recognized text
-    
-            // Append user message to the chat window
-            chatWindow.appendChild(userMessage);
-    
-            // Create a div element for bot message (translated text)
-            const botMessage = document.createElement('div');
-            botMessage.classList.add('message', 'computer'); // Add CSS classes 'message' and 'computer' for styling
-            botMessage.textContent = 'Translated: ' + translatedText; // Display translated text
-    
-            // Append bot message to the chat window
-            chatWindow.appendChild(botMessage);
-    
-            // Scroll chat window to the bottom to show latest messages
-            chatWindow.scrollTop = chatWindow.scrollHeight;
-        }
-    });
 
+<script>
     document.getElementById('clearConversation').addEventListener('click', function() {
     // Clear local storage history
         localStorage.removeItem('conversation');
@@ -108,7 +35,64 @@
             console.error('Chat container not found');
         }
     });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const micBtn = document.getElementById("mic-btn");
+        const chatWindow = document.querySelector('.chat');
+
+        micBtn.addEventListener("click", function() {
+            this.disabled = true;
+
+            fetch('/translate', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const language = detectLanguage(data.recognized_text);
+                    addChatMessage(data.recognized_text, data.translated_text, language);
+                } else {
+                    addChatMessage("Error", data.error || "No specific error message provided.");
+                }
+            })
+            .catch(error => {
+                addChatMessage("Fetch error", error.message);
+            })
+            .finally(() => {
+                this.disabled = false;
+            });
+        });
+
+        function detectLanguage(text) {
+            const hasChineseCharacters = /[\u3400-\u9FBF]/;
+            return hasChineseCharacters.test(text) ? 'Chinese' : 'English';
+        }
+
+        function addChatMessage(recognizedText, translatedText, language) {
+            const messageContainer = document.createElement('div');
+            messageContainer.classList.add('message-container');
+
+            const languageMessage = document.createElement('div');
+            languageMessage.classList.add('message', 'language');
+            languageMessage.textContent = language === 'Chinese' ? 'Chinese' : 'English';
+
+            const userMessage = document.createElement('div');
+            userMessage.classList.add('message', 'user');
+            userMessage.textContent = 'Recognized: ' + recognizedText;  
+
+            messageContainer.appendChild(languageMessage);
+            messageContainer.appendChild(userMessage);
+
+            const botMessage = document.createElement('div');
+            botMessage.classList.add('message', 'translation');
+            botMessage.textContent = 'Translated: ' + translatedText;  
+
+            messageContainer.appendChild(botMessage);
+
+            chatWindow.appendChild(messageContainer);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+    });
 </script>
+
+
 {% endblock %}
-
-
