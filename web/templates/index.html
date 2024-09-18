@@ -21,77 +21,71 @@
     </div>
 </body>
 
-
+<script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.min.js"></script>
 <script>
-    document.getElementById('clearConversation').addEventListener('click', function() {
-    // Clear local storage history
-        localStorage.removeItem('conversation');
-
-        // Clear the chat container content
-        const chatContainer = document.querySelector('.chat');
-        if (chatContainer) {
-            chatContainer.innerHTML = '';  // Clear the content of the chat container
-        } else {
-            console.error('Chat container not found');
-        }
-    });
-
     document.addEventListener('DOMContentLoaded', function() {
-        const micBtn = document.getElementById("mic-btn");
-        const chatWindow = document.querySelector('.chat');
+    const socket = io();
+    const micBtn = document.getElementById("mic-btn");
+    const chatWindow = document.querySelector('.chat');
+    let recognitionStarted = false;
 
-        micBtn.addEventListener("click", function() {
-            this.disabled = true;
-
-            fetch('/translate', { method: 'POST' })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const language = detectLanguage(data.recognized_text);
-                    addChatMessage(data.recognized_text, data.translated_text, language);
-                } else {
-                    addChatMessage("Error", data.error || "No specific error message provided.");
-                }
-            })
-            .catch(error => {
-                addChatMessage("Fetch error", error.message);
-            })
-            .finally(() => {
-                this.disabled = false;
-            });
-        });
-
-        function detectLanguage(text) {
-            const hasChineseCharacters = /[\u3400-\u9FBF]/;
-            return hasChineseCharacters.test(text) ? 'Chinese' : 'English';
+    micBtn.addEventListener("click", function() {
+        if (!recognitionStarted) {
+            socket.emit('start_recognition');
+            recognitionStarted = true;
+            micBtn.textContent = 'Stop';
+        } else {
+            socket.emit('stop_recognition');
+            recognitionStarted = false;
+            micBtn.textContent = 'Start';
         }
-
-        function addChatMessage(recognizedText, translatedText, language) {
-            const messageContainer = document.createElement('div');
-            messageContainer.classList.add('message-container');
-
-            const languageMessage = document.createElement('div');
-            languageMessage.classList.add('message', 'language');
-            languageMessage.textContent = language === 'Chinese' ? 'Chinese' : 'English';
-
-            const userMessage = document.createElement('div');
-            userMessage.classList.add('message', 'user');
-            userMessage.textContent = 'Recognized: ' + recognizedText;  
-
-            messageContainer.appendChild(languageMessage);
-            messageContainer.appendChild(userMessage);
-
-            const botMessage = document.createElement('div');
-            botMessage.classList.add('message', 'translation');
-            botMessage.textContent = 'Translated: ' + translatedText;  
-
-            messageContainer.appendChild(botMessage);
-
-            chatWindow.appendChild(messageContainer);
-            chatWindow.scrollTop = chatWindow.scrollHeight;
-        }
-
     });
+
+    socket.on('recognition_result', function(data) {
+        if (data.recognized_text && data.translated_text) {
+            const language = detectLanguage(data.recognized_text);
+            addChatMessage(data.recognized_text, data.translated_text, language);
+        }
+    });
+
+    socket.on('status', function(data) {
+        console.log(data.status);
+    });
+
+    socket.on('error', function(data) {
+        console.error(data.error);
+    });
+
+    function detectLanguage(text) {
+        const hasChineseCharacters = /[\u3400-\u9FBF]/;
+        return hasChineseCharacters.test(text) ? 'Chinese' : 'English';
+    }
+
+    function addChatMessage(recognizedText, translatedText, language) {
+        const messageContainer = document.createElement('div');
+        messageContainer.classList.add('message-container');
+
+        const languageMessage = document.createElement('div');
+        languageMessage.classList.add('message', 'language');
+        languageMessage.textContent = language;
+
+        const userMessage = document.createElement('div');
+        userMessage.classList.add('message', 'user');
+        userMessage.textContent = 'Recognized: ' + recognizedText;  
+
+        messageContainer.appendChild(languageMessage);
+        messageContainer.appendChild(userMessage);
+
+        const botMessage = document.createElement('div');
+        botMessage.classList.add('message', 'translation');
+        botMessage.textContent = 'Translated: ' + translatedText;  
+
+        messageContainer.appendChild(botMessage);
+
+        chatWindow.appendChild(messageContainer);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+});
 </script>
 
 
