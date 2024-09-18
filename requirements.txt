@@ -7,3 +7,4 @@ deepl
 numpy
 openai_whisper
 torch
+flask-socketio
