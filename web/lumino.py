@@ -15,6 +15,9 @@ from deepl import Translator
 class Lumino:
     def __init__(self):
         self.DEEPL_API_KEY = os.getenv("DEEPL_API_KEY")
+
+        self.spoken_language = "EN"
+
         # Time when a spoken line was taken fom queue
         self.line_time = None
 
@@ -101,7 +104,10 @@ class Lumino:
                     else:
                         self.speech_text[-1] = text
 
-                    translation = self.translate(text=text)
+                    if self.spoken_language == "ZH":
+                        translation = self.translate(source='zh-CN', target='en', text=text)
+                    else:
+                        translation = self.translate(text=text)
                     os.system('clear' if os.name == 'posix' else 'cls')
                     yield text, translation
 
