@@ -43,7 +43,7 @@ sr.Microphone.list_working_microphones()
 sr.Microphone.list_microphone_names()
 ```
 This gives a list of which microphones are active and the position of all microphones. 
-Line 38 may need to be adapted to 
+Line 38 of Lumino.py may need to be adapted to 
 ```python
 self.source = sr.Microphone(i)
 ```
