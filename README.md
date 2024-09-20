@@ -47,5 +47,5 @@ Line 38 may need to be adapted to
 ```python
 self.source = sr.Microphone(i)
 ```
-where `i` is the index position of desired microphone. Typically, `self.source = sr.Microphone()` should suffice, but this is not gauranteed. If on linux, highly recommend to use pulseaudio
+where `i` is the index position of desired microphone. Typically, `self.source = sr.Microphone()` should suffice, but this is not guaranteed. If on linux, highly recommend to use pulseaudio
 
