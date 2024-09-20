@@ -20,7 +20,7 @@ Lumino makes use of:
 - torch
 
 ## Installation instructions
-It is highly recommended to create a new venv to run this application
+Python v3.12.x is recommended version of python. It is also highly recommended to create a new venv to run this application
 ```
 python3 -m venv <venvname>
 source <venvname>/bin/activate
