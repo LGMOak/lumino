@@ -59,7 +59,7 @@ class Lumino:
         # https://pypi.org/project/deep-translator/#google-translate-1
         translation = GoogleTranslator(source=source, target=target).translate(text)
         # translation = Translator(auth_key=self.DEEPL_API_KEY).translate_text(source_lang='EN-US', target_lang='ZH-HANS',
-        #                                                                      text=text, context="Medical chedical checkup appointment"eckup appointment")
+        #                                                                      text=text, context="Medical checkup appointment")
         return translation
 
     def speech_recognition(self):
