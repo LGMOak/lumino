@@ -45,7 +45,11 @@ class Lumino:
         # How much empty space between recordings before we consider it a new line in the transcription.
         self.line_timeout = 3
 
+        # keep a record of the whole conversation (for context parsing)
         self.speech_text = ['']
+
+        # spoken line
+        self.spoken_line = ""
 
         print("Adjusting noise...")
         with self.source:
@@ -55,7 +59,7 @@ class Lumino:
         # https://pypi.org/project/deep-translator/#google-translate-1
         translation = GoogleTranslator(source=source, target=target).translate(text)
         # translation = Translator(auth_key=self.DEEPL_API_KEY).translate_text(source_lang='EN-US', target_lang='ZH-HANS',
-        #                                                                      text=text, context="Medical checkup appointment")
+        #                                                                      text=text, context="Medical chedical checkup appointment"eckup appointment")
         return translation
 
     def speech_recognition(self):
@@ -100,9 +104,14 @@ class Lumino:
 
                     # either add new line or edit last line
                     if line_end:
+                        # append to whole speech
                         self.speech_text.append(text)
                     else:
+                        # Edit line
                         self.speech_text[-1] = text
+
+                    # record newest line separately from whole conversation
+                    self.spoken_line = text
 
                     if self.spoken_language == "ZH":
                         translation = self.translate(source='zh-CN', target='en', text=text)
