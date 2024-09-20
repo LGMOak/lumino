@@ -31,5 +31,21 @@ For microphone recognition, pyaudio must be installed. This is highly dependent 
   - `pip install pyaudio`
 - On OSX
   - `brew install portaudio` followed by `pip install pyaudio`
-- On Linux
-  - `sudo apt-get install portaudio19-dev python-all-dev python3-all-dev && sudo pip3 install pyaudio`  
+- On Linux, pulseaudio is highly recommended
+  - `sudo apt-get install pulseaudio`   
+  - `sudo apt-get install portaudio19-dev python-all-dev python3-all-dev && sudo pip3 install pyaudio`
+ 
+Furthermore, the available and selected microphones are highly device dependent so some modifications may be required.
+```python
+import speech_recognition as sr
+
+sr.Microphone.list_working_microphones()
+sr.Microphone.list_microphone_names()
+```
+This gives a list of which microphones are active and the position of all microphones. 
+Line 38 may need to be adapted to 
+```python
+self.source = sr.Microphone(i)
+```
+where `i` is the index position of desired microphone. Typically, `self.source = sr.Microphone()` should suffice, but this is not gauranteed. If on linux, highly recommend to use pulseaudio
+
