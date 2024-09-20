@@ -19,6 +19,8 @@ Lumino makes use of:
 - openai_whisper
 - torch
 
+If issues occur, remove the strict version requirement in requirements.txt and install the latest version of each package
+
 ## Installation instructions
 Python v3.12.x is recommended version of python. It is also highly recommended to create a new venv to run this application
 ```
