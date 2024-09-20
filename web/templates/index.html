@@ -84,8 +84,20 @@
 
         chatWindow.appendChild(messageContainer);
         chatWindow.scrollTop = chatWindow.scrollHeight;
-    }
-});
+        }
+    });
+
+    // Clear function button 
+        document.getElementById('clearConversation').addEventListener('click', function() {
+        localStorage.removeItem('conversation');
+
+        const chatContainer = document.querySelector('.chat');
+        if (chatContainer) {
+            chatContainer.innerHTML = '';  
+        } else {
+            console.error('Cannot find the chat Container');
+        }
+    });
 </script>
 
 
