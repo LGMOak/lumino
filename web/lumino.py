@@ -10,6 +10,8 @@ import speech_recognition as sr
 from queue import Queue
 from deep_translator import GoogleTranslator, DeeplTranslator
 from deepl import Translator
+import google.generativeai as gem
+from keys import GEMINI_API_KEY
 
 
 class Lumino:
@@ -25,6 +27,10 @@ class Lumino:
 
         self.recognizer = sr.Recognizer()
         self.recognizer.dynamic_energy_threshold = False
+
+        # LLM for generating user context
+        self.gem.configure(api_key=GEMINI_API_KEY)
+        self.model = gem.GenerativeModel("gemini-1.5-flash")
 
         # common linux bug
         self.source = None
@@ -61,6 +67,15 @@ class Lumino:
         # translation = Translator(auth_key=self.DEEPL_API_KEY).translate_text(source_lang='EN-US', target_lang='ZH-HANS',
         #                                                                      text=text, context="Medical checkup appointment")
         return translation
+
+    def generate_context(self, prompt="", scenario=""):
+        context_prompt = (f"Please provide contextual conversation for the following conversation to an elderly Chinese"
+                          f"immigrant in australia, who does not speak English, for the scenario {scenario}.")
+
+        response = self.model.generate_content(f"{context_prompt} {prompt}", stream=True)
+
+        for paragraph in response:
+            yield paragraph.text
 
     def speech_recognition(self):
         def transcript_data(r, audio_data: sr.AudioData):
