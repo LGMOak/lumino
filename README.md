@@ -17,7 +17,8 @@ Lumino makes use of:
 - deepl
 - numpy
 - openai_whisper
-- torch
+- torch 
+- google-generativeai
 
 If issues occur, remove the strict version requirement in requirements.txt and install the latest version of each package
 
