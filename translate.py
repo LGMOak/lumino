@@ -43,3 +43,16 @@ def translate(source=None, target='en', text='', context=None, split_sentences=0
         return __deeptranslate(source=source, target=target, text=text, context=context, split_sentences=split_sentences, preserve_formatting=preserve_formatting, formality=formality,glossary_id=glossary_id)
     else:
         print(f'Choose a valid model')
+
+if __name__ == '__main__':
+    #expect: Hola, esto es una prueba.
+    #works
+    print(translate(source='en', target='es', text='Hello, this is a test.'))
+
+    #expect: How are you? This is a test.
+    #works
+    print(translate(text='你好吗。这是一个测试。'))
+
+    #expect: Today Mom died. Or maybe yesterday, I don't know.
+    #works
+    print(translate(text="Aujourd'hui Maman est morte. Ou peut-être hier, je ne sais pas"))
