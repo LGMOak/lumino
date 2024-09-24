@@ -1,6 +1,4 @@
-import os
 import time
-import datetime
 import sys
 import os
 import torch
@@ -8,8 +6,7 @@ import whisper
 import numpy as np
 import speech_recognition as sr
 from queue import Queue
-from deep_translator import GoogleTranslator, DeeplTranslator
-from deepl import Translator
+from deep_translator import GoogleTranslator
 import google.generativeai as gem
 from keys import GEMINI_API_KEY
 
@@ -20,6 +17,8 @@ class Lumino:
 
         self.spoken_language = "EN"
 
+        self.scenario = "Centrelink"
+
         # Time when a spoken line was taken fom queue
         self.line_time = None
 
@@ -29,7 +28,7 @@ class Lumino:
         self.recognizer.dynamic_energy_threshold = False
 
         # LLM for generating user context
-        self.gem.configure(api_key=GEMINI_API_KEY)
+        gem.configure(api_key=GEMINI_API_KEY)
         self.model = gem.GenerativeModel("gemini-1.5-flash")
 
         # common linux bug
@@ -69,14 +68,11 @@ class Lumino:
         return translation
 
     def generate_context(self, prompt="", scenario=""):
-        context_prompt = (f"Please provide contextual conversation for the following conversation to an elderly Chinese"
-                          f"immigrant in australia, who does not speak English, for the scenario {scenario}.")
+        context_prompt = f"Explain this conversation for me in simple words. {prompt}"
 
-        response = self.model.generate_content(f"{context_prompt} {prompt}", stream=True)
+        response = self.model.generate_content(f"{context_prompt} {prompt}")
 
-        for paragraph in response:
-            yield paragraph.text
-
+        return response.text
     def speech_recognition(self):
         def transcript_data(r, audio_data: sr.AudioData):
             """
@@ -133,14 +129,19 @@ class Lumino:
                     else:
                         translation = self.translate(text=text)
                     os.system('clear' if os.name == 'posix' else 'cls')
-                    yield text, translation
+
+                    conversation = ' '.join(self.speech_text)
+                    context = self.generate_context(conversation, self.scenario)
+                    yield text, translation, context
 
             except KeyboardInterrupt:
-                return self.speech_text, None
+                return self.speech_text, None, None
 
 
 if __name__ == "__main__":
     l = Lumino()
-    for line, translated in l.speech_recognition():
+    for line, translated, context in l.speech_recognition():
         print(line)
         print(f"Translated: {translated}")
+        print(f"Context: {context}")
+

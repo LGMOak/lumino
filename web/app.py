@@ -31,7 +31,7 @@ def background_recognition():
             lumino_instance = Lumino()
 
         # Continuously get recognition results from the speech_recognition generator
-        for text, translation in lumino_instance.speech_recognition():
+        for text, translation, context in lumino_instance.speech_recognition():
             # Check if the thread should stop
             if thread_stop_event.is_set():
                 break
