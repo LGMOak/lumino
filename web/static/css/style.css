@@ -7,8 +7,15 @@ body {
     position: relative;
 }
 
-.container {
-    width: 100%;
+.navbar {
+    display: flex;
+    justify-content: flex-end; 
+    align-items: center;
+}
+
+.navbar-brand{
+    margin-right: auto;
+    font-size: 25px;
 }
 
 .chat {
@@ -17,7 +24,8 @@ body {
     flex-direction: column;
     align-items: flex-start; 
     margin: 20px;
-    overflow: hidden;
+    overflow-y: auto;
+    max-height: calc(100vh - 100px); 
 }
 
 .message-container {
@@ -30,7 +38,6 @@ body {
         0 4px 8px rgba(0, 0, 0, 0.1),
         inset 0 -1px 2px rgba(0, 0, 0, 0.2); 
 }
-
 
 .message.translation {
     align-self: flex-start;
@@ -47,33 +54,33 @@ body {
     color: white;
 }
 
-.footer {
-    position: absolute; 
-    bottom: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: center; 
-    padding: 20px 0; 
-    background-color: #f1f1f1; 
-    gap: 60px; 
-}
-
-
-#scenario, #start, #clearConversation {
+#scenario, #start, #clearConversation, #mic-btn {
     background-color: #007BFF;
     color: white;
+    white-space: nowrap;
+    text-align: center;
+    transition: width 0.3s ease;
+    overflow: hidden;
+    height: 40px;
+    margin-right: 8px;
 }
 
 #scenario:hover, #start:hover, #clearConversation:hover {
     background: linear-gradient(60deg, #87878758, #bab6b6); 
     box-shadow:  0 6px 12px rgba(0, 0, 0, 0.2); 
+    white-space: nowrap;
+}
+
+#mic-btn:hover{
+    background: linear-gradient(60deg, #87878758, #bab6b6); 
+    box-shadow:  0 6px 12px rgba(0, 0, 0, 0.2); 
+    white-space: nowrap;
 }
 
 button {
     padding: 10px 20px;
     border: none;
-    border-radius: 8px;
+    border-radius: 5px;
     background: linear-gradient(45deg, #007BFF, #03c0ff);
     color: white;
     font-size: 16px;
@@ -96,12 +103,11 @@ button.active {
 .select_content {
     display: none;
     position: absolute;
-    bottom: 50px; 
     background-color: #f9f9f9;
     box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    margin-top: 5%;
     z-index: 1;
-    border-radius: 8px;
-    padding: 5px;
+    z-index: 100;
 }
 
 .select_content a {
