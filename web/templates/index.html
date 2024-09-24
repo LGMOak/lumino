@@ -6,23 +6,39 @@
 
 {% block content %}
 <body>
+
+<!-- The top navigation bar include name and buttons -->
+    <nav class="navbar navbar-expand-md navbar-light bg-light">
+        <a class="navbar-brand" href="{{ url_for('index')}}">Lumino</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="selection">
+            <button id="scenario">Scenario</button>
+            <div class="select_content" id="select_menu">
+                <a href="#" data-value="Option 1">Medical Service</a>
+                <a href="#" data-value="Option 2">Social Service</a>
+                <a href="#" data-value="Option 3">Local Community</a>
+                <a href="#" data-value="Option 4">General</a>
+            </div>
+        </div>
+        <button id="mic-btn">
+            <!-- <i class="bi bi-mic-fill"></i>  -->
+            Start
+        </button>
+        <button id="clearConversation">Clear</button>
+    </nav>
+    
     <!-- dynamic update the content -->
     <div class="chat"></div>
 
-    <!-- Footer  -->
-    <div class="footer">
-        <div class="selection">
-            <button id="scenario">Scenario</button>
-        </div>
-        <button id="mic-btn" class="btn btn-primary mic-btn-icon mx-2">
-            <i class="bi bi-mic-fill"></i> Start
-        </button>
-        <button id="clearConversation">Clear</button>
-    </div>
 </body>
 
+<!-- JavaScript -->
 <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.min.js"></script>
 <script>
+
+    // Start to record function 
     document.addEventListener('DOMContentLoaded', function() {
     const socket = io();
     const micBtn = document.getElementById("mic-btn");
@@ -56,11 +72,13 @@
         console.error(data.error);
     });
 
+    // Function to detect the speaking language, generate by ChatGPT
     function detectLanguage(text) {
         const hasChineseCharacters = /[\u3400-\u9FBF]/;
         return hasChineseCharacters.test(text) ? 'Chinese' : 'English';
     }
 
+    // Function to add translation result into chatBox, generate by ChatGPT
     function addChatMessage(recognizedText, translatedText, language) {
         const messageContainer = document.createElement('div');
         messageContainer.classList.add('message-container');
@@ -87,7 +105,7 @@
         }
     });
 
-    // Clear function button 
+    // Clear function button, generate by ChatGPT
         document.getElementById('clearConversation').addEventListener('click', function() {
         localStorage.removeItem('conversation');
 
@@ -98,7 +116,41 @@
             console.error('Cannot find the chat Container');
         }
     });
-</script>
 
+    // Select senario, and display the selected one, generate by ChatGPT
+    document.getElementById('scenario').addEventListener('click', function() {
+        var dropdownMenu = document.getElementById('select_menu');
+        var button = this;
+
+        dropdownMenu.classList.toggle('show');
+        button.classList.toggle('active');
+    });
+
+    window.onclick = function(event) {
+        if (!event.target.matches('#scenario')) {
+            var dropdownMenu = document.getElementById('select_menu');
+            var button = document.getElementById('scenario');
+
+            if (dropdownMenu.classList.contains('show')) {
+                dropdownMenu.classList.remove('show');
+                button.classList.remove('active');
+            }
+        }
+    };
+
+    // Change the select option front size, generate by ChatGPT
+    document.querySelectorAll('#select_menu a').forEach(function(item) {
+    item.addEventListener('click', function() {
+        var button = document.getElementById('scenario');
+        button.textContent = this.textContent; 
+        
+        button.style.width = ""; 
+        button.style.width = button.scrollWidth + "px";
+
+        button.classList.remove('active');
+        document.getElementById('select_menu').classList.remove('show');
+        });
+    });
+</script>
 
 {% endblock %}
