@@ -39,7 +39,8 @@ def background_recognition():
             # Emit the recognized text and translation to the client via WebSocket
             socketio.emit('recognition_result', {
                 'recognized_text': text,
-                'translated_text': translation
+                'translated_text': translation,
+                'generated_context': context
             })
     except Exception as e:
         # If an error occurs, emit the error message to the client

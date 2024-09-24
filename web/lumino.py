@@ -67,8 +67,9 @@ class Lumino:
         #                                                                      text=text, context="Medical checkup appointment")
         return translation
 
-    def generate_context(self, prompt="", scenario=""):
-        context_prompt = f"Explain this conversation for me in simple words. {prompt}"
+    def generate_context(self, prompt=""):
+        context_prompt = (f"Explain this line in a conversation for me in simple words, "
+                          f"given the previous lines. {prompt}")
 
         response = self.model.generate_content(f"{context_prompt} {prompt}")
 
@@ -130,9 +131,9 @@ class Lumino:
                         translation = self.translate(text=text)
                     os.system('clear' if os.name == 'posix' else 'cls')
 
-                    conversation = ' '.join(self.speech_text)
-                    context = self.generate_context(conversation, self.scenario)
-                    yield text, translation, context
+                    # conversation = ' '.join(self.speech_text)
+                    context = self.generate_context(self.spoken_line)
+                    yield self.spoken_line, translation, context
 
             except KeyboardInterrupt:
                 return self.speech_text, None, None
@@ -141,7 +142,7 @@ class Lumino:
 if __name__ == "__main__":
     l = Lumino()
     for line, translated, context in l.speech_recognition():
-        print(line)
+        print("Recognised: ", line)
         print(f"Translated: {translated}")
         print(f"Context: {context}")
 

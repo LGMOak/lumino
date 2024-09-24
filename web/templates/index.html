@@ -60,7 +60,7 @@
     socket.on('recognition_result', function(data) {
         if (data.recognized_text && data.translated_text) {
             const language = detectLanguage(data.recognized_text);
-            addChatMessage(data.recognized_text, data.translated_text, language);
+            addChatMessage(data.recognized_text, data.translated_text, data.generated_context, language);
         }
     });
 
@@ -79,7 +79,17 @@
     }
 
     // Function to add translation result into chatBox, generate by ChatGPT
-    function addChatMessage(recognizedText, translatedText, language) {
+    function addChatMessage(recognizedText, translatedText, generatedText, language) {
+        localStorage.removeItem('conversation');
+
+        const chatContainer = document.querySelector('.chat');
+        if (chatContainer) {
+            chatContainer.innerHTML = '';
+        } else {
+            console.error('Cannot find the chat Container');
+        }
+
+
         const messageContainer = document.createElement('div');
         messageContainer.classList.add('message-container');
 
@@ -89,7 +99,7 @@
 
         const userMessage = document.createElement('div');
         userMessage.classList.add('message', 'user');
-        userMessage.textContent = 'Recognized: ' + recognizedText;  
+        userMessage.textContent = 'Recognized: ' + recognizedText;
 
         messageContainer.appendChild(languageMessage);
         messageContainer.appendChild(userMessage);
@@ -99,6 +109,13 @@
         botMessage.textContent = 'Translated: ' + translatedText;  
 
         messageContainer.appendChild(botMessage);
+
+        const bMessage = document.createElement('div');
+        bMessage.classList.add('message', 'generated');
+        bMessage.textContent = 'Context: ' + generatedText;
+
+        messageContainer.appendChild(bMessage);
+
 
         chatWindow.appendChild(messageContainer);
         chatWindow.scrollTop = chatWindow.scrollHeight;
