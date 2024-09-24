@@ -1,5 +1,7 @@
 ## DECO3801 Lumino
-Description here
+lumino.py holds all the functionality and can be run on its own for testing.
+app.py is the main file that hosts the flask website and connects all functionality.
+speech.py, translate.py and generate.py are all standalone programs for speech recognition / transcription, text translation and AI context generation respectively. These are simple examples for testing and can each be run on their own.
 
 ## Library Requirements
 ```python
