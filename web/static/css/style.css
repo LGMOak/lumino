@@ -54,6 +54,15 @@ body {
     color: white;
 }
 
+.message.generated {
+    align-self: flex-end;
+    background: linear-gradient(45deg, #5500ff96, #b300f994);
+    padding: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    color: white;
+    font-size: 13px;
+}
+
 #scenario, #start, #clearConversation, #mic-btn {
     background-color: #007BFF;
     color: white;
