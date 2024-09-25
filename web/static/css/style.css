@@ -11,11 +11,15 @@ body {
     display: flex;
     justify-content: flex-end; 
     align-items: center;
+    background: linear-gradient(45deg, #007BFF, #03c0ff);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
 .navbar-brand{
     margin-right: auto;
     font-size: 25px;
+    color: white;
+    font-weight: bold;
 }
 
 .chat {
@@ -26,6 +30,16 @@ body {
     margin: 20px;
     overflow-y: auto;
     max-height: calc(100vh - 100px); 
+}
+
+.message {
+    padding: 5px 10px;  
+    display: flex;
+    align-items: center;
+}
+
+.bi {
+    margin-right: 5px;  
 }
 
 .message-container {
@@ -39,33 +53,47 @@ body {
         inset 0 -1px 2px rgba(0, 0, 0, 0.2); 
 }
 
-.message.translation {
-    align-self: flex-start;
-    background: linear-gradient(45deg, #d3d3d3, #e2e2e2); 
-    padding: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
-}
-
 .message.user {
     align-self: flex-end;
-    background: linear-gradient(45deg, #007BFF, #03c0ff);
     padding: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    color: white;
+    color: rgb(0, 0, 0);
+    font-style: italic;
+    font-family: Lato;
+    border-bottom: 2px dashed black;
+    word-wrap: normal;
+    margin-bottom: 8px;
+}
+
+.message.translation {
+    align-self: flex-start;
+    padding: 10px;
+    word-wrap: normal;
 }
 
 .message.generated {
     align-self: flex-end;
-    background: linear-gradient(45deg, #5500ff96, #b300f994);
+    background: linear-gradient(45deg, #e1e1e1, #e4e0e087);
     padding: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    color: white;
-    font-size: 13px;
+    color: rgb(60, 60, 60);
+    font-size: 15px; 
+    word-wrap: normal;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background: linear-gradient(45deg, #bbbcbd, #dcecf1);
+    color: rgb(0, 0, 0);
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    transition: background 0.5s ease-in-out, box-shadow 0.3s ease-in-out;
+    width: 100px;
 }
 
 #scenario, #start, #clearConversation, #mic-btn {
-    background-color: #007BFF;
-    color: white;
     white-space: nowrap;
     text-align: center;
     transition: width 0.3s ease;
@@ -75,33 +103,17 @@ body {
 }
 
 #scenario:hover, #start:hover, #clearConversation:hover {
-    background: linear-gradient(60deg, #87878758, #bab6b6); 
+    background: linear-gradient(60deg, #ffe100, #fff201); 
     box-shadow:  0 6px 12px rgba(0, 0, 0, 0.2); 
     white-space: nowrap;
+    font-weight: bold;
 }
 
-#mic-btn:hover{
-    background: linear-gradient(60deg, #87878758, #bab6b6); 
+#mic-btn:hover {
+    background: linear-gradient(60deg, #ffe100, #fff201); 
     box-shadow:  0 6px 12px rgba(0, 0, 0, 0.2); 
     white-space: nowrap;
-}
-
-button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    background: linear-gradient(45deg, #007BFF, #03c0ff);
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    transition: background 0.5s ease-in-out, box-shadow 0.3s ease-in-out;
-    width: 100px;
-}
-
-button.active {
-    background: linear-gradient(45deg, #8c939a, #b9b9b9); 
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+    font-weight: bold;
 }
 
 .selection {
