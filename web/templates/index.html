@@ -28,7 +28,23 @@
         </button>
         <button id="clearConversation">Clear</button>
     </nav>
-    
+
+<form action="/" method="get">
+    <label for="microphone">Select Microphone:</label>
+    <select name="microphone" id="microphone" onchange="this.form.submit()">
+        {% for mic in mics %}
+        <option value="{{ mic }}" {% if mic == selected_microphone %}selected{% endif %}>{{ mic }}</option>
+        {% endfor %}
+    </select>
+</form>
+
+<form action="/" method="get">
+    <!-- Keep the selected microphone in a hidden input -->
+    <input type="hidden" name="microphone" value="{{ selected_microphone }}">
+    <input type="hidden" name="lang" value="{{ 'CN' if language == 'EN' else 'EN' }}">
+    <button type="submit">{{ 'Switch to Chinese' if language == 'EN' else 'Switch to English' }}</button>
+</form>
+
     <!-- dynamic update the content -->
     <div class="chat"></div>
 
