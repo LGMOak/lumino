@@ -31,16 +31,8 @@ class Lumino:
         gem.configure(api_key=GEMINI_API_KEY)
         self.model = gem.GenerativeModel("gemini-1.5-flash")
 
-        # common linux bug
-        self.source = None
-        if 'linux' in sys.platform:
-            mic_name = "pulse"
-            for i, mic in enumerate(sr.Microphone.list_microphone_names()):
-                if mic_name in mic:
-                    self.source = sr.Microphone(sample_rate=16000, device_index=i)
-                    break
-        else:
-            self.source = sr.Microphone()
+        # default mic
+        self.source = sr.Microphone(sample_rate=16000)
 
         # Load / Download model
         self.audio_model = whisper.load_model("small")
@@ -56,16 +48,24 @@ class Lumino:
         # spoken line
         self.spoken_line = ""
 
-        print("Adjusting noise...")
-        with self.source:
-            self.recognizer.adjust_for_ambient_noise(self.source, duration=1)
-
     def translate(self, source='en', target='zh-CN', text=''):
         # https://pypi.org/project/deep-translator/#google-translate-1
         translation = GoogleTranslator(source=source, target=target).translate(text)
         # translation = Translator(auth_key=self.DEEPL_API_KEY).translate_text(source_lang='EN-US', target_lang='ZH-HANS',
         #                                                                      text=text, context="Medical checkup appointment")
         return translation
+
+    def set_input_source(self, input_device):
+        print(input_device)
+        self.source = sr.Microphone(sample_rate=16000, device_index=int(input_device))
+
+    def set_language(self, speaking_language):
+        print(speaking_language)
+        self.spoken_language = speaking_language
+
+    def set_context(self, context_scenario):
+        print(context_scenario)
+        self.scenario = context_scenario
 
     def generate_context(self, prompt=""):
         context_prompt = (f"Explain this line in a conversation for me in simple words, "
@@ -75,6 +75,10 @@ class Lumino:
 
         return response.text
     def speech_recognition(self):
+        print("Adjusting noise...")
+        print(self.source)
+        with self.source:
+            self.recognizer.adjust_for_ambient_noise(self.source, duration=1)
         def transcript_data(r, audio_data: sr.AudioData):
             """
             Get the audio data line-by-line and add to queue
@@ -125,11 +129,11 @@ class Lumino:
                     # record newest line separately from whole conversation
                     self.spoken_line = text
 
+                    print(self.spoken_language, text)
                     if self.spoken_language == "ZH":
                         translation = self.translate(source='zh-CN', target='en', text=text)
                     else:
                         translation = self.translate(text=text)
-                    os.system('clear' if os.name == 'posix' else 'cls')
 
                     # conversation = ' '.join(self.speech_text)
                     context = self.generate_context(self.spoken_line)

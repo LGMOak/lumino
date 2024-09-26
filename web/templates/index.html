@@ -15,19 +15,22 @@
         </button>
         <div class="selection">
             <button id="scenario">Scenario</button>
-            <div class="select_content" id="select_menu">
-                <a href="#" data-value="Option 1">Medical Service</a>
-                <a href="#" data-value="Option 2">Social Service</a>
-                <a href="#" data-value="Option 3">Local Community</a>
-                <a href="#" data-value="Option 4">General</a>
+            <div class="select_content" id="select_context">
+                <a href="/" data-value="Medical">Medical Service</a>
+                <a href="/" data-value="Social">Social Service</a>
+                <a href="/" data-value="Community">Local Community</a>
+                <a href="/" data-value="General">General</a>
             </div>
+            <form action="/" method="get" id="selectionForm">
+                <input type="hidden" name="selected_context" id="selected_context" value="">
+            </form>
         </div>
         <button id="mic-btn"><i class="bi bi-mic-fill"></i>Start</button>
 
         <form action="/" method="get" id="switch">
             <!-- Keep the selected microphone in a hidden input -->
-            <input type="hidden" name="microphone" value="{{ selected_microphone }}">
-            <input type="hidden" name="lang" value="{{ 'CN' if language == 'EN' else 'EN' }}">
+            <input type="hidden" name="microphone" value="{{ selected_mic }}">
+            <input type="hidden" name="lang" value="{{ 'ZH' if language == 'EN' else 'EN' }}">
             <button type="submit">{{ 'Switch to Chinese' if language == 'EN' else 'Switch to English' }}</button>
         </form>
         
@@ -38,7 +41,7 @@
         <label for="microphone">Select Microphone:</label>
         <select name="microphone" id="microphone" onchange="this.form.submit()">
             {% for mic in mics %}
-            <option value="{{ mic }}" {% if mic == selected_microphone %}selected{% endif %}>{{ mics.get(mic) }}</option>
+            <option value="{{ loop.index - 1 }}" {% if mic == mic_name %} selected {% endif %}>{{ mic  }}</option>
             {% endfor %}
         </select>
     </form>
@@ -51,7 +54,14 @@
 <!-- JavaScript -->
 <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.min.js"></script>
 <script>
-
+    document.querySelectorAll('#select_context a').forEach(item => {
+        item.addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent the default anchor behavior
+            const selectedValue = this.getAttribute('data-value');
+            document.getElementById('selected_option').value = selectedValue; // Set the hidden input
+            document.getElementById('selectionForm').submit(); // Submit the form
+        });
+    });
     // Start to record function 
     document.addEventListener('DOMContentLoaded', function() {
     const socket = io();
@@ -160,7 +170,7 @@
 
     // Select senario, and display the selected one, generate by ChatGPT
     document.getElementById('scenario').addEventListener('click', function() {
-        var dropdownMenu = document.getElementById('select_menu');
+        var dropdownMenu = document.getElementById('select_context');
         var button = this;
 
         dropdownMenu.classList.toggle('show');
@@ -169,7 +179,7 @@
 
     window.onclick = function(event) {
         if (!event.target.matches('#scenario')) {
-            var dropdownMenu = document.getElementById('select_menu');
+            var dropdownMenu = document.getElementById('select_context');
             var button = document.getElementById('scenario');
 
             if (dropdownMenu.classList.contains('show')) {
@@ -180,7 +190,7 @@
     };
 
     // Change the select option front size, generate by ChatGPT
-    document.querySelectorAll('#select_menu a').forEach(function(item) {
+    document.querySelectorAll('#select_context a').forEach(function(item) {
     item.addEventListener('click', function() {
         var button = document.getElementById('scenario');
         button.textContent = this.textContent; 
@@ -189,7 +199,7 @@
         button.style.width = button.scrollWidth + "px";
 
         button.classList.remove('active');
-        document.getElementById('select_menu').classList.remove('show');
+        document.getElementById('select_context').classList.remove('show');
         });
     });
 </script>

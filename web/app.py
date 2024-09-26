@@ -10,10 +10,10 @@ app.config['SECRET_KEY'] = 'secret!'  # Set the secret key for session managemen
 socketio = SocketIO(app)  # Wrap the app with SocketIO to enable WebSocket support
 
 # Global variables to manage the Lumino instance and threading
-lumino_instance = None        # Holds the instance of the Lumino class
+lumino_instance = Lumino()        # Holds the instance of the Lumino class
 recognition_thread = None     # The background thread that runs speech recognition
 thread_stop_event = None      # Event to signal the thread to stop
-audio_sources = sr.Microphone.list_working_microphones()
+audio_sources = sr.Microphone.list_microphone_names()
 
 @app.route('/')
 def index():
@@ -21,10 +21,20 @@ def index():
     Handle the root URL and render the main page.
     """
     language = request.args.get('lang', 'EN')
+    if language is not None:
+        lumino_instance.set_language(language)
 
-    selected_mic = request.args.get('microphone', sr.Microphone())
+    selected_mic = request.args.get('microphone', 0)
+    if selected_mic is not None and selected_mic != '':
+        lumino_instance.set_input_source(selected_mic)
 
-    return render_template('index.html', language=language, mics=audio_sources, selected_mic=selected_mic)
+    selected_context = request.args.get('selected_option', 'General')
+    if selected_context is not None:
+        lumino_instance.set_context(selected_context)
+
+    return render_template('index.html', language=language, mics=audio_sources,
+                           selected_mic=selected_mic, mic_name=audio_sources[int(selected_mic)],
+                           selected_context=selected_context)
 
 def background_recognition():
     """
