@@ -22,28 +22,26 @@
                 <a href="#" data-value="Option 4">General</a>
             </div>
         </div>
-        <button id="mic-btn">
-            <i class="bi bi-mic-fill"></i> 
-            Start
-        </button>
+        <button id="mic-btn"><i class="bi bi-mic-fill"></i>Start</button>
+
+        <form action="/" method="get" id="switch">
+            <!-- Keep the selected microphone in a hidden input -->
+            <input type="hidden" name="microphone" value="{{ selected_microphone }}">
+            <input type="hidden" name="lang" value="{{ 'CN' if language == 'EN' else 'EN' }}">
+            <button type="submit">{{ 'Switch to Chinese' if language == 'EN' else 'Switch to English' }}</button>
+        </form>
+        
         <button id="clearConversation">Clear</button>
     </nav>
 
-<form action="/" method="get">
-    <label for="microphone">Select Microphone:</label>
-    <select name="microphone" id="microphone" onchange="this.form.submit()">
-        {% for mic in mics %}
-        <option value="{{ mic }}" {% if mic == selected_microphone %}selected{% endif %}>{{ mics.get(mic) }}</option>
-        {% endfor %}
-    </select>
-</form>
-
-<form action="/" method="get">
-    <!-- Keep the selected microphone in a hidden input -->
-    <input type="hidden" name="microphone" value="{{ selected_microphone }}">
-    <input type="hidden" name="lang" value="{{ 'CN' if language == 'EN' else 'EN' }}">
-    <button type="submit">{{ 'Switch to Chinese' if language == 'EN' else 'Switch to English' }}</button>
-</form>
+    <form action="/" method="get" id="mic">
+        <label for="microphone">Select Microphone:</label>
+        <select name="microphone" id="microphone" onchange="this.form.submit()">
+            {% for mic in mics %}
+            <option value="{{ mic }}" {% if mic == selected_microphone %}selected{% endif %}>{{ mics.get(mic) }}</option>
+            {% endfor %}
+        </select>
+    </form>
 
     <!-- dynamic update the content -->
     <div class="chat"></div>
