@@ -90,13 +90,12 @@ button {
     cursor: pointer;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     transition: background 0.5s ease-in-out, box-shadow 0.3s ease-in-out;
-    width: 100px;
+    width: auto;
 }
 
-#scenario, #start, #clearConversation, #mic-btn {
+#scenario, #start, #clearConversation, #mic-btn, #switch {
     white-space: nowrap;
     text-align: center;
-    transition: width 0.3s ease;
     overflow: hidden;
     height: 40px;
     margin-right: 8px;
@@ -109,11 +108,42 @@ button {
     font-weight: bold;
 }
 
-#mic-btn:hover {
-    background: linear-gradient(60deg, #ffe100, #fff201); 
-    box-shadow:  0 6px 12px rgba(0, 0, 0, 0.2); 
+#mic {
+    font-family: lato; 
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 2px;
+    background: #c9c8c883; 
+    border-radius: 5px; 
+    box-shadow: 0 2px 4px rgba(57, 57, 57, 0.519); 
+    display: flex;
+    /* margin: 25px;  */
+    width: 20%;
+    align-items: center;
     white-space: nowrap;
-    font-weight: bold;
+}
+
+#mic label {
+    color: #333; 
+    font-size: 14px; 
+    padding-right: 5%;
+    padding-top: 5px;
+}
+
+
+#mic select {
+    width: 80%; 
+    border: 1px solid #ccc; 
+    border-radius: 5px; 
+    background-color: white; 
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.343); 
+    cursor: pointer; 
+    font-size: 16px; 
+    color: black;
+}
+
+#mic select:focus {
+    border-color: #ee0000; 
 }
 
 .selection {
