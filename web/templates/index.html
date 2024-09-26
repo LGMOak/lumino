@@ -33,7 +33,7 @@
     <label for="microphone">Select Microphone:</label>
     <select name="microphone" id="microphone" onchange="this.form.submit()">
         {% for mic in mics %}
-        <option value="{{ mic }}" {% if mic == selected_microphone %}selected{% endif %}>{{ mic }}</option>
+        <option value="{{ mic }}" {% if mic == selected_microphone %}selected{% endif %}>{{ mics.get(mic) }}</option>
         {% endfor %}
     </select>
 </form>
