@@ -1,7 +1,8 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
 from lumino import Lumino
 from threading import Thread, Event
+import speech_recognition as sr
 
 # Initialize the Flask application
 app = Flask(__name__)
@@ -12,13 +13,18 @@ socketio = SocketIO(app)  # Wrap the app with SocketIO to enable WebSocket suppo
 lumino_instance = None        # Holds the instance of the Lumino class
 recognition_thread = None     # The background thread that runs speech recognition
 thread_stop_event = None      # Event to signal the thread to stop
+audio_sources = sr.Microphone.list_working_microphones()
 
 @app.route('/')
 def index():
     """
     Handle the root URL and render the main page.
     """
-    return render_template('index.html')
+    language = request.args.get('lang', 'EN')
+
+    selected_mic = request.args.get('microphone', sr.Microphone())
+
+    return render_template('index.html', language=language, mics=audio_sources, selected_mic=selected_mic)
 
 def background_recognition():
     """
