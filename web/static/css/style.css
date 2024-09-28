@@ -93,7 +93,7 @@ button {
     width: auto;
 }
 
-#scenario, #start, #clearConversation, #mic-btn, #switch {
+#scenario, #start, #clearConversation, #mic-btn, #switch-language {
     white-space: nowrap;
     text-align: center;
     overflow: hidden;
