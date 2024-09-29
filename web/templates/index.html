@@ -2,34 +2,37 @@
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<!-- Include Bootstrap Icons for visual appeal -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 {% endblock %}
 
 {% block content %}
 <body>
 
-<!-- The top navigation bar include name and buttons -->
+    <!-- The top navigation bar include name and buttons -->
     <nav class="navbar navbar-expand-md">
-        <a class="navbar-brand" href="{{ url_for('index')}}">Lumino</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="selection">
-            <button id="scenario">Scenario</button>
-            <div class="select_content" id="select_context">
-                <a href="/" data-value="Medical">Medical Service</a>
-                <a href="/" data-value="Social">Social Service</a>
-                <a href="/" data-value="Community">Local Community</a>
-                <a href="/" data-value="General">General</a>
-            </div>
-            <form action="/" method="get" id="selectionForm">
-                <input type="hidden" name="selected_context" id="selected_option" value="">
-            </form>
+        <div class="navbar-left">
+            <a class="navbar-brand" href="{{ url_for('index')}}">Lumino</a>
         </div>
-        <button id="mic-btn"><i class="bi bi-mic-fill"></i>Start</button>
+        <div class="navbar-right">
+            <div class="selection">
+                <button id="scenario"><i class="bi bi-card-list"></i> Scenario <i class="bi bi-caret-down-fill"></i></button>
+                <div class="select_content" id="select_context">
+                    <a href="/" data-value="Medical">Medical Service</a>
+                    <a href="/" data-value="Social">Social Service</a>
+                    <a href="/" data-value="Community">Local Community</a>
+                    <a href="/" data-value="General">General</a>
+                </div>
+                <form action="/" method="get" id="selectionForm">
+                    <input type="hidden" name="selected_context" id="selected_option" value="">
+                </form>
+            </div>
+            <button id="mic-btn"><i class="bi bi-mic-fill"></i> Start</button>
 
-        <button id="switch-language">{{ 'Switch to Chinese' if language == 'EN' else 'Switch to English' }}</button>
-        
-        <button id="clearConversation">Clear</button>
+            <button id="switch-language"><i class="bi bi-translate"></i> {{ 'Switch to Chinese' if language == 'EN' else 'Switch to English' }}</button>
+            
+            <button id="clearConversation"><i class="bi bi-trash-fill"></i> Clear</button>
+        </div>
     </nav>
 
     <form action="/" method="get" id="mic">
@@ -71,11 +74,11 @@
         if (!recognitionStarted) {
             socket.emit('start_recognition');
             recognitionStarted = true;
-            micBtn.textContent = 'Stop';
+            micBtn.innerHTML = '<i class="bi bi-stop-fill"></i> Stop';
         } else {
             socket.emit('stop_recognition');
             recognitionStarted = false;
-            micBtn.textContent = 'Start';
+            micBtn.innerHTML = '<i class="bi bi-mic-fill"></i> Start';
             currentMessageContainer = null; // Reset current message container when stopping
         }
     });
@@ -99,10 +102,10 @@
     socket.on('language_switched', function(data) {
         const switchButton = document.getElementById('switch-language');
         if (data.new_language == 'EN') {
-            switchButton.textContent = 'Switch to Chinese';
+            switchButton.innerHTML = '<i class="bi bi-translate"></i> Switch to Chinese';
             currentLanguage = 'EN';
         } else {
-            switchButton.textContent = 'Switch to English';
+            switchButton.innerHTML = '<i class="bi bi-translate"></i> Switch to English';
             currentLanguage = 'ZH';
         }
     });
@@ -207,7 +210,7 @@
     });
 
     window.onclick = function(event) {
-        if (!event.target.matches('#scenario')) {
+        if (!event.target.matches('#scenario') && !event.target.matches('#scenario *')) {
             var dropdownMenu = document.getElementById('select_context');
             var button = document.getElementById('scenario');
 
@@ -222,7 +225,7 @@
     document.querySelectorAll('#select_context a').forEach(function(item) {
     item.addEventListener('click', function() {
         var button = document.getElementById('scenario');
-        button.textContent = this.textContent; 
+        button.innerHTML = '<i class="bi bi-card-list"></i> ' + this.textContent + ' <i class="bi bi-caret-down-fill"></i>'; 
         
         button.style.width = ""; 
         button.style.width = button.scrollWidth + "px";
