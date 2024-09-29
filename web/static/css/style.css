@@ -163,7 +163,7 @@ button i {
     box-shadow: 0 2px 4px rgba(57, 57, 57, 0.519); 
     display: flex;
     /* margin: 25px;  */
-    width: 35%;
+    width: 32%;
     align-items: center;
     white-space: nowrap;
 }
