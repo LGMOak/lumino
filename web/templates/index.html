@@ -2,37 +2,31 @@
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-<!-- Include Bootstrap Icons for visual appeal -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 {% endblock %}
 
 {% block content %}
 <body>
 
-    <!-- The top navigation bar include name and buttons -->
+<!-- The top navigation bar include name and buttons -->
     <nav class="navbar navbar-expand-md">
-        <div class="navbar-left">
-            <a class="navbar-brand" href="{{ url_for('index')}}">Lumino</a>
-        </div>
-        <div class="navbar-right">
-            <div class="selection">
-                <button id="scenario"><i class="bi bi-card-list"></i> Scenario <i class="bi bi-caret-down-fill"></i></button>
-                <div class="select_content" id="select_context">
-                    <a href="/" data-value="Medical">Medical Service</a>
-                    <a href="/" data-value="Social">Social Service</a>
-                    <a href="/" data-value="Community">Local Community</a>
-                    <a href="/" data-value="General">General</a>
-                </div>
-                <form action="/" method="get" id="selectionForm">
-                    <input type="hidden" name="selected_context" id="selected_option" value="">
-                </form>
+        <a class="navbar-brand" href="{{ url_for('index')}}">Lumino</a>
+        <div class="selection">
+            <button id="scenario"><i class="bi bi-card-list"></i> Scenario <i class="bi bi-caret-down-fill"></i></button>
+            <div class="select_content" id="select_context">
+                <a href="/" data-value="Medical">Medical Service</a>
+                <a href="/" data-value="Social">Social Service</a>
+                <a href="/" data-value="Community">Local Community</a>
+                <a href="/" data-value="General">General</a>
             </div>
-            <button id="mic-btn"><i class="bi bi-mic-fill"></i> Start</button>
-
-            <button id="switch-language"><i class="bi bi-translate"></i> {{ 'Switch to Chinese' if language == 'EN' else 'Switch to English' }}</button>
-            
-            <button id="clearConversation"><i class="bi bi-trash-fill"></i> Clear</button>
+            <form action="/" method="get" id="selectionForm">
+                <input type="hidden" name="selected_context" id="selected_context" value="">
+            </form>
         </div>
+        <button id="mic-btn"><i class="bi bi-mic-fill"></i>Start</button>
+
+        <button id="switch-language"><i class="bi bi-translate"></i> {{ 'Switch to Chinese' if language == 'EN' else 'Switch to English' }}</button>
+        
+        <button id="clearConversation"><i class="bi bi-trash-fill"></i> Clear</button>
     </nav>
 
     <form action="/" method="get" id="mic">
@@ -46,7 +40,6 @@
 
     <!-- dynamic update the content -->
     <div class="chat"></div>
-
 </body>
 
 <!-- JavaScript -->
@@ -60,7 +53,6 @@
             document.getElementById('selectionForm').submit(); // Submit the form
         });
     });
-
     // Start to record function 
     document.addEventListener('DOMContentLoaded', function() {
     const socket = io();
@@ -125,6 +117,9 @@
         console.error(data.error);
     });
 
+    // Function to detect the speaking language, generate by ChatGPT
+    
+
     // Function to add the message to the chat window
     function addChatMessage(recognizedText, translatedText, generatedText, language, isNewLine) {
         const chatContainer = document.querySelector('.chat');
@@ -188,8 +183,8 @@
     }
     });
 
-    // Clear function button
-    document.getElementById('clearConversation').addEventListener('click', function() {
+    // Clear function button, generate by ChatGPT
+        document.getElementById('clearConversation').addEventListener('click', function() {
         localStorage.removeItem('conversation');
 
         const chatContainer = document.querySelector('.chat');
@@ -200,7 +195,7 @@
         }
     });
 
-    // Select scenario, and display the selected one
+    // Select senario, and display the selected one, generate by ChatGPT
     document.getElementById('scenario').addEventListener('click', function() {
         var dropdownMenu = document.getElementById('select_context');
         var button = this;
