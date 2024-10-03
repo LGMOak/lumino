@@ -10,22 +10,24 @@
 <!-- The top navigation bar include name and buttons -->
     <nav class="navbar navbar-expand-md">
         <a class="navbar-brand" href="{{ url_for('index')}}">Lumino</a>
+
+
         <div class="selection">
-            <button id="scenario"><i class="bi bi-card-list"></i> Scenario <i class="bi bi-caret-down-fill"></i></button>
-            <div class="select_content" id="select_context">
-                <a href="/" data-value="Medical">Medical Service</a>
-                <a href="/" data-value="Social">Social Service</a>
-                <a href="/" data-value="Community">Local Community</a>
-                <a href="/" data-value="General">General</a>
-            </div>
-            <form action="/" method="get" id="selectionForm">
-                <input type="hidden" name="selected_context" id="selected_context" value="">
+            <button id="scenario" type="button" onclick="toggleDropdown()"><i class="bi bi-card-list"></i> Scenario <i class="bi bi-caret-down-fill"></i></button>
+            <form action="/" method="GET" id="context">
+                <input name="context" type="hidden" id="selected_context">
+                <div class="select_content" id="select_context">
+                    {% for scen in contexts.keys() %}
+                    <a href="/" class="scenario-link" onclick="selectContext('{{ scen }}', this)">{{ scen }}</a>
+                    {% endfor %}
+                </div>
             </form>
         </div>
+
         <button id="mic-btn"><i class="bi bi-mic-fill"></i>Start</button>
 
         <button id="switch-language"><i class="bi bi-translate"></i> {{ 'Switch to Chinese' if language == 'EN' else 'Switch to English' }}</button>
-        
+
         <button id="clearConversation"><i class="bi bi-trash-fill"></i> Clear</button>
     </nav>
 
@@ -45,6 +47,11 @@
 <!-- JavaScript -->
 <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.min.js"></script>
 <script>
+    function selectContext(value) {
+    document.getElementById('selected_context').value = value;
+    document.getElementById('context').submit();
+    }
+
     document.querySelectorAll('#select_context a').forEach(item => {
         item.addEventListener('click', function(event) {
             event.preventDefault(); // Prevent the default anchor behavior

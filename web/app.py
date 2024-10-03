@@ -1,8 +1,8 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session
 from flask_socketio import SocketIO, emit
 from lumino import Lumino
 from threading import Thread, Event
-import speech_recognition as sr
+from speech_recognition import Microphone
 
 # Initialize the Flask application
 app = Flask(__name__)
@@ -13,28 +13,40 @@ socketio = SocketIO(app)  # Wrap the app with SocketIO to enable WebSocket suppo
 lumino_instance = Lumino()        # Holds the instance of the Lumino class
 recognition_thread = None     # The background thread that runs speech recognition
 thread_stop_event = None      # Event to signal the thread to stop
-audio_sources = sr.Microphone.list_microphone_names()
+audio_sources = Microphone.list_microphone_names()
 
 @app.route('/')
 def index():
     """
     Handle the root URL and render the main page.
     """
-    language = request.args.get('lang', 'EN')
-    if language is not None:
-        lumino_instance.set_language(language)
+    selected_microphone = session.get('microphone', 0)
+    selected_context = session.get('context', 'General')
+    selected_language = session.get('lang', 'EN')
 
-    selected_mic = request.args.get('microphone', 0)
-    if selected_mic is not None and selected_mic != '':
-        lumino_instance.set_input_source(selected_mic)
+    scenarios = lumino_instance.get_scenarios()
 
-    selected_context = request.args.get('selected_option', 'General')
-    if selected_context is not None:
+    if 'microphone' in request.args:
+        selected_microphone = request.args.get('microphone')
+        session['microphone'] = selected_microphone
+        print("MIC", selected_microphone)
+        lumino_instance.set_input_source(selected_microphone)
+
+    if 'context' in request.args:
+        selected_context = request.args.get('context')
+        session['context'] = selected_context
         lumino_instance.set_context(selected_context)
 
+    if 'lang' in request.args:
+        selected_language = request.args.get('lang')
+        session['lang'] = selected_language
+        lumino_instance.set_language(selected_language)
+
+    print(selected_microphone, selected_language, selected_context)
+
     return render_template('index.html', language=lumino_instance.spoken_language, mics=audio_sources,
-                           selected_mic=selected_mic, mic_name=audio_sources[int(selected_mic)],
-                           selected_context=selected_context)
+                           selected_mic=selected_microphone, mic_name=audio_sources[int(selected_microphone)],
+                           selected_context=selected_context, contexts=scenarios)
 
 def background_recognition():
     """

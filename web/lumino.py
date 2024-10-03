@@ -6,9 +6,12 @@ import whisper
 import numpy as np
 import speech_recognition as sr
 from queue import Queue
-from deep_translator import GoogleTranslator
+import deepl
 import google.generativeai as gem
-from keys import GEMINI_API_KEY
+from deep_translator import GoogleTranslator
+
+from keys import GEMINI_API_KEY, DEEPL_API_KEY
+import threading  # NEW: Imported threading module to handle stop events
 
 
 class Lumino:
@@ -17,9 +20,14 @@ class Lumino:
 
         self.spoken_language = "EN"
 
-        self.scenario = "Centrelink"
+        self.scenarios = {
+            "General": "Translation for Chinese elderly immigrant in Australia. Context is general and informal",
+            "Community": "Translation for Chinese elderly immigrant in Australia. User is interacting out with local community, friends, family or workers",
+            "Medical": "Translation for Chinese elderly immigrant in Australia. User has an appointment with a medical doctor.",
+            "Social": "Translation for Chinese elderly immigrant in Australia. User has an appointment with a social service worker. Centrelink is name of services program"}
+        self.selected_scenario = "General"
 
-        # Time when a spoken line was taken fom queue
+        # Time when a spoken line was taken from queue
         self.line_time = None
 
         self.audio_queue = Queue()
@@ -32,7 +40,7 @@ class Lumino:
         self.model = gem.GenerativeModel("gemini-1.5-flash")
 
         # default mic
-        self.source = sr.Microphone(sample_rate=16000)
+        self.source = sr.Microphone(0, sample_rate=16000)
 
         # Load / Download model
         self.audio_model = whisper.load_model("small")
@@ -42,30 +50,37 @@ class Lumino:
         # How much empty space between recordings before we consider it a new line in the transcription.
         self.line_timeout = 3
 
-        # keep a record of the whole conversation (for context parsing)
+        # Keep a record of the whole conversation (for context parsing)
         self.speech_text = ['']
 
-        # spoken line
+        # Spoken line
         self.spoken_line = ""
 
-    def translate(self, source='en', target='zh-CN', text=''):
-        # https://pypi.org/project/deep-translator/#google-translate-1
-        translation = GoogleTranslator(source=source, target=target).translate(text)
-        # translation = Translator(auth_key=self.DEEPL_API_KEY).translate_text(source_lang='EN-US', target_lang='ZH-HANS',
-        #                                                                      text=text, context="Medical checkup appointment")
+        # A stop event to stop the recognition
+        self.stop_event = threading.Event()  # NEW: Event to signal when to stop recognition
+
+        # Save the stop function from listen_in_background
+        self.stop_listening = None  # NEW: Holds the function to stop background listening
+
+    def translate(self, source='EN', target='ZH-HANS', text=''):
+        translator = deepl.Translator(DEEPL_API_KEY)
+
+        formality = 'prefer_less'
+        if self.get_context() == "Medical" or self.get_context() == "Services":
+            formality = 'prefer_more'
+
+        # translation = translator.translate_text(text=text, source_lang=source, target_lang=target,
+        #                                         context=self.get_scenarios()[self.get_context()], formality=formality)
+        translation = GoogleTranslator(source='en', target='zh-CN').translate(text)
         return translation
 
     def set_input_source(self, input_device):
-        print(input_device)
-        self.source = sr.Microphone(sample_rate=16000, device_index=int(input_device))
+
+        self.source = sr.Microphone(device_index=int(input_device), sample_rate=16000)
 
     def set_language(self, speaking_language):
-        print(speaking_language)
-        self.spoken_language = speaking_language
 
-    def set_context(self, context_scenario):
-        print(context_scenario)
-        self.scenario = context_scenario
+        self.spoken_language = speaking_language
 
     def generate_context(self, prompt=""):
         context_prompt = (f"Explain this line in a conversation for me in simple words, "
@@ -74,73 +89,96 @@ class Lumino:
         response = self.model.generate_content(f"{context_prompt} {prompt}")
 
         return response.text
+
+    def get_context(self):
+
+        return self.selected_scenario
+
+    def set_context(self, context_scenario):
+
+        self.selected_scenario = context_scenario
+
+    def get_scenarios(self):
+
+        return self.scenarios
+
+    def reset_stop_event(self):
+        self.stop_event.clear()
+        self.stop_listening = None  # NEW: Reset the stop_listening function
+
+    def stop_recognition(self):
+        self.stop_event.set()
+        if self.stop_listening is not None:
+            self.stop_listening()  # NEW: Stop the background listening
+            self.stop_listening = None
+        # empty the queue
+        self.audio_queue.queue.clear()  # NEW: Clear the audio queue
+
     def speech_recognition(self):
         print("Adjusting noise...")
         print(self.source)
-        with self.source:
-            self.recognizer.adjust_for_ambient_noise(self.source, duration=1)
+        with self.source as source:
+            self.recognizer.adjust_for_ambient_noise(source, duration=1)
+
         def transcript_data(r, audio_data: sr.AudioData):
-            """
-            Get the audio data line-by-line and add to queue
-            :param audio_data: incoming audio stream
-            :return:
-            """
             data = audio_data.get_raw_data()
             self.audio_queue.put(data)
 
         print("Recording...")
-        self.recognizer.listen_in_background(self.source, transcript_data, phrase_time_limit=self.record_timeout)
+        # save the stop function
+        self.stop_listening = self.recognizer.listen_in_background(
+            self.source, transcript_data, phrase_time_limit=self.record_timeout)  # NEW: Save the stop function
 
         # audio data in bytes
         audio_data = b''
 
-        while True:
+        while not self.stop_event.is_set():  # NEW: Check the stop event
             try:
                 start = time.time()
 
                 if not self.audio_queue.empty():
                     line_end = False
-                    # line ends when 3s has passed
+                    # Line ends when 3s has passed
                     if time.time() - start > self.line_timeout:
                         line_end = True
-                        # new audio data -> new line
+                        # New audio data -> new line
                         audio_data = b''
                     self.line_time = start
 
-                    # combine audio data
+                    # Combine audio data
                     audio_data = audio_data + b''.join(self.audio_queue.queue)
                     self.audio_queue.queue.clear()
 
-                    # numpy torch audio data stuff
+                    # Numpy torch audio data stuff
                     audio_np = np.frombuffer(audio_data, dtype=np.int16).astype(np.float32) / 32768.0
 
                     # Read the transcription.
                     result = self.audio_model.transcribe(audio_np, fp16=torch.cuda.is_available())
                     text = result['text'].strip()
 
-                    # either add new line or edit last line
+                    # Either add new line or edit last line
                     if line_end:
-                        # append to whole speech
+                        # Append to whole speech
                         self.speech_text.append(text)
                     else:
                         # Edit line
                         self.speech_text[-1] = text
 
-                    # record newest line separately from whole conversation
+                    # Record newest line separately from whole conversation
                     self.spoken_line = text
 
-                    print(self.spoken_language, text)
                     if self.spoken_language == "ZH":
-                        translation = self.translate(source='zh-CN', target='en', text=text)
+                        translation = self.translate(source='ZH', target='EN-GB', text=text)
                     else:
                         translation = self.translate(text=text)
 
-                    # conversation = ' '.join(self.speech_text)
+                    # Generate context
                     context = self.generate_context(self.spoken_line)
                     yield self.spoken_line, translation, context
 
             except KeyboardInterrupt:
                 return self.speech_text, None, None
+        print("Speech recognition stopped.")  # NEW: Indicate that recognition has stopped
 
 
 if __name__ == "__main__":
@@ -149,4 +187,3 @@ if __name__ == "__main__":
         print("Recognised: ", line)
         print(f"Translated: {translated}")
         print(f"Context: {context}")
-
