@@ -40,7 +40,7 @@ class Lumino:
         self.model = gem.GenerativeModel("gemini-1.5-flash")
 
         # default mic
-        self.source = sr.Microphone(0, sample_rate=16000)
+        self.source = None
 
         # Load / Download model
         self.audio_model = whisper.load_model("small")
@@ -69,14 +69,15 @@ class Lumino:
         if self.get_context() == "Medical" or self.get_context() == "Services":
             formality = 'prefer_more'
 
-        # translation = translator.translate_text(text=text, source_lang=source, target_lang=target,
-        #                                         context=self.get_scenarios()[self.get_context()], formality=formality)
-        translation = GoogleTranslator(source='en', target='zh-CN').translate(text)
+        translation = translator.translate_text(text=text, source_lang=source, target_lang=target,
+                                                context=self.get_scenarios()[self.get_context()], formality=formality)
+        # translation = GoogleTranslator(source='en', target='zh-CN').translate(text)
         return translation
 
     def set_input_source(self, input_device):
 
-        self.source = sr.Microphone(device_index=int(input_device), sample_rate=16000)
+        mic = sr.Microphone(input_device, sample_rate=16000)
+        self.source = mic
 
     def set_language(self, speaking_language):
 
@@ -115,6 +116,11 @@ class Lumino:
         self.audio_queue.queue.clear()  # NEW: Clear the audio queue
 
     def speech_recognition(self):
+        print("Setting up microphone")
+        print(self.source)
+        if self.source is None:
+            self.source = sr.Microphone(14, sample_rate=16000)
+
         print("Adjusting noise...")
         print(self.source)
         with self.source as source:

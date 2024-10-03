@@ -30,7 +30,7 @@ def index():
         selected_microphone = request.args.get('microphone')
         session['microphone'] = selected_microphone
         print("MIC", selected_microphone)
-        lumino_instance.set_input_source(selected_microphone)
+        lumino_instance.set_input_source(int(selected_microphone))
 
     if 'context' in request.args:
         selected_context = request.args.get('context')
@@ -41,8 +41,6 @@ def index():
         selected_language = request.args.get('lang')
         session['lang'] = selected_language
         lumino_instance.set_language(selected_language)
-
-    print(selected_microphone, selected_language, selected_context)
 
     return render_template('index.html', language=lumino_instance.spoken_language, mics=audio_sources,
                            selected_mic=selected_microphone, mic_name=audio_sources[int(selected_microphone)],
