@@ -10,7 +10,7 @@ body {
 /* Navigation Bar Styles */
 .navbar {
     display: flex;
-    justify-content: space-between; /* Adjusted to have left and right sections */
+    justify-content: space-between;
     align-items: center;
     background: linear-gradient(45deg, #007BFF, #03c0ff);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
@@ -55,6 +55,7 @@ button:hover {
 button i {
     margin-right: 5px;
 }
+
 
 /* Scenario Selection Dropdown */
 .selection {
@@ -180,4 +181,47 @@ button i {
 
 #mic select:focus {
     border-color: #ee0000; 
+}
+
+
+/* Mobile-specific adjustments */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: row; 
+        align-items: flex-end; 
+    }
+
+    button:hover {
+        background: linear-gradient(60deg, #ffe100, #fff201);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    #scenario {
+        font-size: 14px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+
+    #mic-btn {
+        margin-left: 10px;
+        font-size: 14px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+
+    #switch-language {
+        font-size: 14px;
+        border-radius: 5px;
+        margin-left: 170px;
+    }
+
+    #clearConversation {
+        font-size: 14px;
+        border-radius: 5px;
+    }
+
+    #mic {
+        width: 100%;
+    }
+
 }
