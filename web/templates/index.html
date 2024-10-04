@@ -236,6 +236,21 @@
         document.getElementById('select_context').classList.remove('show');
         });
     });
+
+    // Update the scenario button to fit the mobile version 
+    function adjustScenarioMobile() {
+    var button = document.getElementById('scenario');
+    if (window.innerWidth <= 768) {
+        button.style.fontSize = "14px";
+        button.style.borderRadius = "5px";
+    } else {
+        button.style.fontSize = "";
+        button.style.borderRadius = "";
+        }
+    }
+    window.onload = adjustScenarioMobile;
+    window.addEventListener('resize', adjustScenarioMobile);
+    
 </script>
 
 {% endblock %}
