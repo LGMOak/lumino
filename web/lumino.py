@@ -15,6 +15,7 @@ class Lumino:
     def __init__(self):
         self.DEEPL_API_KEY = os.getenv("DEEPL_API_KEY")
         self.spoken_language = "EN"
+        self.target_language = "ZH"
         self.scenarios = {"General": "Translation for Chinese elderly immigrant in Australia. Context is general and informal",
                           "Community": "Translation for Chinese elderly immigrant in Australia. User is interacting out with local community, friends, family or workers",
                           "Medical": "Translation for Chinese elderly immigrant in Australia. User has an appointment with a medical doctor.",
@@ -50,10 +51,13 @@ class Lumino:
             self.source = sr.Microphone(sample_rate=16000)
 
     def set_language(self, speaking_language):
+        self.target_language = self.spoken_language
         self.spoken_language = speaking_language
 
     def generate_context(self, prompt=""):
-        context_prompt = (f"Explain this line in a conversation for me in simple words, given the previous lines. {prompt}")
+        context_prompt = (f"Explain this conversation for me so far: {prompt}."
+                          f"Try to infer the context of the conversation, where the scenario is {self.get_scenarios()[self.get_context()]}"
+                          f" given all the previous lines. Give the entire output in {self.target_language} language")
         response = self.model.generate_content(f"{context_prompt} {prompt}")
         return response.text
 
