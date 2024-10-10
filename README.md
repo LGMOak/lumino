@@ -2,6 +2,8 @@
 lumino.py holds all the functionality and can be run on its own for testing.
 app.py is the main file that hosts the flask website and connects all functionality.
 speech.py, translate.py and generate.py are all standalone programs for speech recognition / transcription, text translation and AI context generation respectively. These are simple examples for testing and can each be run on their own.
+Requires an API key to generative LLM. Google's Gemini currently implemented. Support for OpenAI and Antrhoptic. 
+Translation using DeepL requires API key. Google Translate does not require API key
 
 ## Library Requirements
 ```python
