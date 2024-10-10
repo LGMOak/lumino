@@ -55,10 +55,10 @@ class Lumino:
         self.spoken_language = speaking_language
 
     def generate_context(self, prompt=""):
-        context_prompt = (f"Explain this conversation for me so far: {prompt}."
+        context_prompt = (f"Explain this conversation for me so far in as few sentences as possible: {prompt}."
                           f"Try to infer the context of the conversation, where the scenario is {self.get_scenarios()[self.get_context()]}"
                           f" given all the previous lines. Give the entire output in {self.target_language} language")
-        response = self.model.generate_content(f"{context_prompt} {prompt}")
+        response = self.model.generate_content(f"{context_prompt}")
         return response.text
 
     def get_context(self):
