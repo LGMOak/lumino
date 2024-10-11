@@ -223,33 +223,29 @@
         }
     };
 
-    // Change the select option front size
-    document.querySelectorAll('#select_context a').forEach(function(item) {
-    item.addEventListener('click', function() {
-        var button = document.getElementById('scenario');
-        button.innerHTML = '<i class="bi bi-card-list"></i> ' + this.textContent + ' <i class="bi bi-caret-down-fill"></i>'; 
+    // // Change the select option front size
+    // document.querySelectorAll('#select_context a').forEach(function(item) {
+    // item.addEventListener('click', function() {
+    //     var button = document.getElementById('scenario');
+    //     button.innerHTML = '<i class="bi bi-card-list"></i> ' + this.textContent + ' <i class="bi bi-caret-down-fill"></i>'; 
         
-        button.style.width = ""; 
-        button.style.width = button.scrollWidth + "px";
+    //     button.style.width = ""; 
+    //     button.style.width = button.scrollWidth + "px";
 
-        button.classList.remove('active');
-        document.getElementById('select_context').classList.remove('show');
-        });
-    });
+    //     button.classList.remove('active');
+    //     document.getElementById('select_context').classList.remove('show');
+    //     });
+    // });
 
-    // Update the scenario button to fit the mobile version 
-    function adjustScenarioMobile() {
-    var button = document.getElementById('scenario');
-    if (window.innerWidth <= 768) {
-        button.style.fontSize = "14px";
-        button.style.borderRadius = "5px";
-    } else {
-        button.style.fontSize = "";
-        button.style.borderRadius = "";
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const selectedContext = urlParams.get('context'); 
+
+        if (selectedContext) {
+            var button = document.getElementById('scenario');
+            button.innerHTML = '<i class="bi bi-card-list"></i> ' + selectedContext + ' <i class="bi bi-caret-down-fill"></i>'; 
         }
-    }
-    window.onload = adjustScenarioMobile;
-    window.addEventListener('resize', adjustScenarioMobile);
+    });
     
 </script>
 
