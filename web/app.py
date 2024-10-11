@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request, session, send_file
 from flask_socketio import SocketIO, emit
 from lumino import Lumino
 from threading import Thread
@@ -15,6 +15,15 @@ socketio = SocketIO(app)  # Wrap the app with SocketIO to enable WebSocket suppo
 lumino_instance = Lumino()        # Holds the instance of the Lumino class
 recognition_thread = None     # The background thread that runs speech recognition
 audio_sources = Microphone.list_microphone_names()
+
+@app.route("/manifest.json")
+def serve_manifest():
+
+    return send_file('manifest.json', mimetype='application/manifest+json')
+
+@app.route('/sw.js')
+def serve_sw():
+    return send_file('static/sw.js', mimetype='application/javascript')
 
 @app.route('/')
 def index():

@@ -17,9 +17,10 @@ class Lumino:
         self.spoken_language = "EN"
         self.target_language = "ZH"
         self.scenarios = {"General": "Translation for Chinese elderly immigrant in Australia. Context is general and informal",
-                          "Community": "Translation for Chinese elderly immigrant in Australia. User is interacting out with local community, friends, family or workers",
+                          "Local Community": "Translation for Chinese elderly immigrant in Australia. User is interacting out with local community, friends, family or workers",
                           "Medical": "Translation for Chinese elderly immigrant in Australia. User has an appointment with a medical doctor.",
-                          "Social": "Translation for Chinese elderly immigrant in Australia. User has an appointment with a social service worker. Centrelink is name of services program"}
+                          "Social Services": "Translation for Chinese elderly immigrant in Australia. User has an appointment with a social service worker. "
+                                             "Centrelink is name of services program"}
         self.selected_scenario = "General"
         self.line_time = None
         self.audio_queue = Queue()

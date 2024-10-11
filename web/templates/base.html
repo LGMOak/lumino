@@ -3,7 +3,26 @@
     <head>
     <!-- Required meta tags -->
         <meta charset="utf-8">
+        <meta name="theme-color" content="#42b3dd"/>
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="icon" href="{{url_for('static', filename='icons/logo-no-background.png')}}" type="image/png">
+        <link rel="icon" href="{{url_for('static', filename='icons/logo-no-background.png')}}" type="image/png">
+        <link rel="icon" href="{{url_for('static', filename='icons/logo-no-background.png')}}" type="image/png">
+        <link rel="apple-touch-icon" href="{{url_for('static', filename='icons/logo-no-background.png')}}" type="image/png">
+        <link rel="apple-touch-icon" href="{{url_for('static', filename='icons/logo-no-background.png')}}" type="image/png">
+        <link rel="apple-touch-icon" href="{{url_for('static', filename='icons/logo-no-background.png')}}" type="image/png">
+        <link rel="manifest" href="/manifest.json">
+        <script>
+            if ('serviceWorker' in navigator) {
+              window.addEventListener('load', function() {
+                navigator.serviceWorker.register("/static/sw.js").then(function(registration) {
+                  console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, function(err) {
+                  console.log('ServiceWorker registration failed: ', err);
+                });
+              });
+            }
+        </script>
     
         <!-- Bootstrap CSS -->
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
