@@ -184,40 +184,40 @@ button i {
 }
 
 
-/* Mobile-specific adjustments */
+/* Mobile version adjustments */
 @media (max-width: 768px) {
     .navbar {
-        flex-direction: row; 
-        align-items: flex-end; 
+        flex-direction: column; 
+        align-items: center;
+    } 
+
+    /* .navbar .selection,  */
+    .navbar #mic-btn, 
+    .navbar #switch-language, 
+    .navbar #clearConversation{
+        margin-bottom: 10px; 
+        width: 70%; 
+        font-size: 14px;
+        border-radius: 5px;
+    }
+
+    .navbar #scenario {
+        font-size: 14px;
+        margin-bottom: 10px;
+        width: 100% !important;
     }
 
     button:hover {
         background: linear-gradient(60deg, #ffe100, #fff201);
         box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
     }
-
-    #scenario {
-        font-size: 14px;
-        border-radius: 5px;
-        margin-bottom: 10px;
-    }
-
+    
     #mic-btn {
         margin-left: 10px;
         font-size: 14px;
         border-radius: 5px;
         margin-bottom: 10px;
-    }
-
-    #switch-language {
-        font-size: 14px;
-        border-radius: 5px;
-        margin-left: 170px;
-    }
-
-    #clearConversation {
-        font-size: 14px;
-        border-radius: 5px;
+        width: 100%;
     }
 
     #mic {
@@ -225,3 +225,4 @@ button i {
     }
 
 }
+
