@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% endblock %}
+
+{% block content %}
+<body>
+
+<!-- The top navigation bar include name and buttons -->
+    <nav class="navbar navbar-expand-md">
+        <a class="navbar-brand" href="{{ url_for('index')}}">Lumino</a>
+        <div class="selection">
+            <button id="scenario" type="button" onclick="toggleDropdown()"><i class="bi bi-card-list"></i> Scenario <i class="bi bi-caret-down-fill"></i></button>
+            <form action="/" method="GET" id="context">
+                <input name="context" type="hidden" id="selected_context">
+                <div class="select_content" id="select_context">
+                    {% for scen in contexts.keys() %}
+                    <a href="/" class="scenario-link" onclick="selectContext('{{ scen }}', this)">{{ scen }}</a>
+                    {% endfor %}
+                </div>
+            </form>
+        </div>
+
+        <button id="mic-btn"><i class="bi bi-mic-fill"></i>Start</button>
+
+        <button id="switch-language"><i class="bi bi-translate"></i> {{ 'Switch to Chinese' if language == 'EN' else 'Switch to English' }}</button>
+
+        <button id="clearConversation"><i class="bi bi-trash-fill"></i> Clear</button>
+    </nav>
+
+    <form action="/" method="get" id="mic">
+        <label for="microphone">Select Microphone:</label>
+        <select name="microphone" id="microphone" onchange="this.form.submit()">
+            {% for mic in mics %}
+            <option value="{{ loop.index0 }}" {% if mic == mic_name %} selected {% endif %}>{{ mic  }}</option>
+            {% endfor %}
+        </select>
+    </form>
+
+    <!-- dynamic update the content -->
+    <div class="chat"></div>
+</body>
+
+<!-- JavaScript -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.min.js"></script>
+<script>
+    function selectContext(value) {
+    document.getElementById('selected_context').value = value;
+    document.getElementById('context').submit();
+    }
+
+    document.querySelectorAll('#select_context a').forEach(item => {
+        item.addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent the default anchor behavior
+            const selectedValue = this.getAttribute('data-value');
+            document.getElementById('selected_option').value = selectedValue; // Set the hidden input
+            document.getElementById('selectionForm').submit(); // Submit the form
+        });
+    });
+    // Start to record function 
+    document.addEventListener('DOMContentLoaded', function() {
+    const socket = io();
+    const micBtn = document.getElementById("mic-btn");
+    const chatWindow = document.querySelector('.chat');
+    let recognitionStarted = false;
+    let currentLanguage = '{{ language }}';
+    let currentMessageContainer = null;
+
+    micBtn.addEventListener("click", function() {
+        if (!recognitionStarted) {
+            socket.emit('start_recognition');
+            recognitionStarted = true;
+            micBtn.innerHTML = '<i class="bi bi-stop-fill"></i> Stop';
+        } else {
+            socket.emit('stop_recognition');
+            recognitionStarted = false;
+            micBtn.innerHTML = '<i class="bi bi-mic-fill"></i> Start';
+            currentMessageContainer = null; // Reset current message container when stopping
+        }
+    });
+
+    document.getElementById('switch-language').addEventListener('click', function() {
+        if (recognitionStarted) {
+            alert('The conversation is still ongoing, please switch after ending the session.');
+        } else {
+            socket.emit('switch_language');
+        }
+    });
+
+    socket.on('can_switch_language', function(data) {
+        if (data.can_switch) {
+            socket.emit('confirm_switch_language');
+        } else {
+            alert('The conversation is still ongoing, please switch after ending the session.');
+        }
+    });
+
+    socket.on('language_switched', function(data) {
+        const switchButton = document.getElementById('switch-language');
+        if (data.new_language == 'EN') {
+            switchButton.innerHTML = '<i class="bi bi-translate"></i> Switch to Chinese';
+            currentLanguage = 'EN';
+        } else {
+            switchButton.innerHTML = '<i class="bi bi-translate"></i> Switch to English';
+            currentLanguage = 'ZH';
+        }
+    });
+
+    socket.on('recognition_result', function(data) {
+        if (data.recognized_text && data.translated_text) {
+            const language = data.language;
+            addChatMessage(data.recognized_text, data.translated_text, data.generated_context, language, data.is_new_line);
+        }
+    });
+
+    socket.on('status', function(data) {
+        console.log(data.status);
+    });
+
+    socket.on('error', function(data) {
+        console.error(data.error);
+    });
+
+    // Function to detect the speaking language, generate by ChatGPT
+    
+
+    // Function to add the message to the chat window
+    function addChatMessage(recognizedText, translatedText, generatedText, language, isNewLine) {
+        const chatContainer = document.querySelector('.chat');
+        if (!chatContainer) {
+            console.error('Cannot find the chat Container');
+            return;
+        }
+
+        if (isNewLine || currentMessageContainer === null) {
+            // Create a new message container
+            currentMessageContainer = document.createElement('div');
+            currentMessageContainer.classList.add('message-container');
+
+            // Handle the recognition language
+            const languageMessage = document.createElement('div');
+            languageMessage.classList.add('message', 'language');
+            const speakIcon = document.createElement('i');
+            speakIcon.className = 'bi bi-megaphone-fill';
+            languageMessage.appendChild(speakIcon);
+            languageMessage.append(' Recognised: ' + (language === 'EN' ? 'English' : 'Chinese'));  
+            currentMessageContainer.appendChild(languageMessage);
+
+            const userMessage = document.createElement('div');
+            userMessage.classList.add('message', 'user');
+            userMessage.textContent = recognizedText;
+            currentMessageContainer.appendChild(userMessage);
+
+            // Handle the translation language
+            const translationLanguageMessage = document.createElement('div');
+            translationLanguageMessage.classList.add('message', 'language');
+            const translateIcon = document.createElement('i');
+            translateIcon.className = 'bi bi-translate';
+            translationLanguageMessage.appendChild(translateIcon);
+            translationLanguageMessage.append(' Translation: ' + (language === 'EN' ? 'Chinese' : 'English'));  
+            currentMessageContainer.appendChild(translationLanguageMessage);
+
+            const botMessage = document.createElement('div');
+            botMessage.classList.add('message', 'translation');
+            botMessage.textContent = translatedText;
+            currentMessageContainer.appendChild(botMessage);
+
+            // Handle the generated context
+            const bMessage = document.createElement('div');
+            bMessage.classList.add('message', 'generated');
+            bMessage.textContent = 'Context: ' + generatedText;
+            currentMessageContainer.appendChild(bMessage);
+
+            chatContainer.appendChild(currentMessageContainer);
+        } else {
+            // Update the existing message container
+            const userMessage = currentMessageContainer.querySelector('.message.user');
+            const botMessage = currentMessageContainer.querySelector('.message.translation');
+            const bMessage = currentMessageContainer.querySelector('.message.generated');
+
+            if (userMessage) userMessage.textContent = recognizedText;
+            if (botMessage) botMessage.textContent = translatedText;
+            if (bMessage) bMessage.textContent = 'Context: ' + generatedText;
+        }
+
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+    });
+
+    // Clear function button, generate by ChatGPT
+        document.getElementById('clearConversation').addEventListener('click', function() {
+        localStorage.removeItem('conversation');
+
+        const chatContainer = document.querySelector('.chat');
+        if (chatContainer) {
+            chatContainer.innerHTML = '';  
+        } else {
+            console.error('Cannot find the chat Container');
+        }
+    });
+
+    // Select senario, and display the selected one, generate by ChatGPT
+    document.getElementById('scenario').addEventListener('click', function() {
+        var dropdownMenu = document.getElementById('select_context');
+        var button = this;
+
+        dropdownMenu.classList.toggle('show');
+        button.classList.toggle('active');
+    });
+
+    window.onclick = function(event) {
+        if (!event.target.matches('#scenario') && !event.target.matches('#scenario *')) {
+            var dropdownMenu = document.getElementById('select_context');
+            var button = document.getElementById('scenario');
+
+            if (dropdownMenu.classList.contains('show')) {
+                dropdownMenu.classList.remove('show');
+                button.classList.remove('active');
+            }
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const selectedContext = urlParams.get('context'); 
+
+        if (selectedContext) {
+            var button = document.getElementById('scenario');
+            button.innerHTML = '<i class="bi bi-card-list"></i> ' + selectedContext + ' <i class="bi bi-caret-down-fill"></i>'; 
+        }
+    });
+    
+</script>
+
+{% endblock %}
