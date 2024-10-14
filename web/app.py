@@ -18,11 +18,16 @@ audio_sources = Microphone.list_microphone_names()
 
 @app.route("/manifest.json")
 def serve_manifest():
-
+    """
+    Serve the manifest.json file for PWA support. #Copilot
+    """
     return send_file('manifest.json', mimetype='application/manifest+json')
 
 @app.route('/sw.js')
 def serve_sw():
+    """
+    Serve the service worker script for PWA support. #Copilot
+    """
     return send_file('static/sw.js', mimetype='application/javascript')
 
 @app.route('/')
@@ -111,8 +116,10 @@ def handle_stop_recognition():
     global recognition_thread, lumino_instance
     if recognition_thread and recognition_thread.is_alive():
         lumino_instance.stop_recognition()
-        recognition_thread.join()
-        recognition_thread = None
+        if recognition_thread:
+            recognition_thread.join()
+        else:
+            recognition_thread = None
         emit('status', {'status': 'Recognition stopped'})
         # Clear the conversation content for the new session
         lumino_instance.clear_conversation()
@@ -124,20 +131,37 @@ def handle_switch_language():
     """
     Handle the 'switch_language' event from the client to switch the speaking language.
     """
-    global recognition_thread
-    can_switch = not (recognition_thread and recognition_thread.is_alive())
-    emit('can_switch_language', {'can_switch': can_switch})
-
-@socketio.on('confirm_switch_language')
-def handle_confirm_switch_language():
-    """
-    Confirm language switch after user accepts the prompt.
-    """
     global lumino_instance
+    # kill the current recognition thread
+    # lumino_instance.stop_recognition()
+    # recognition_thread = None
     new_language = 'ZH' if lumino_instance.spoken_language == 'EN' else 'EN'
     lumino_instance.set_language(new_language)
     emit('language_switched', {'new_language': new_language})
     emit('status', {'status': f'Language switched to {new_language}'})
+
+
+# @socketio.on('switch_language')
+# def handle_switch_language():
+#     """
+#     Handle the 'switch_language' event from the client to switch the speaking language.
+#     """
+#     global recognition_thread
+#     # can_switch = not (recognition_thread and recognition_thread.is_alive())
+#     recognition_thread = None
+#     can_switch = True
+#     emit('can_switch_language', {'can_switch': can_switch})
+
+# @socketio.on('confirm_switch_language')
+# def handle_confirm_switch_language():
+#     """
+#     Confirm language switch after user accepts the prompt.
+#     """
+#     global lumino_instance
+#     new_language = 'ZH' if lumino_instance.spoken_language == 'EN' else 'EN'
+#     lumino_instance.set_language(new_language)
+#     emit('language_switched', {'new_language': new_language})
+#     emit('status', {'status': f'Language switched to {new_language}'})
 
 @socketio.on('disconnect')
 def handle_disconnect():
@@ -149,4 +173,3 @@ def handle_disconnect():
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
-

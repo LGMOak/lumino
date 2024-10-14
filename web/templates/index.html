@@ -9,11 +9,16 @@
 
 <!-- The top navigation bar include name and buttons -->
     <nav class="navbar navbar-expand-md">
-        <a class="navbar-brand" href="{{ url_for('index')}}">Lumino</a>
-
+        <a class="navbar-brand" href="{{ url_for('index')}}"> 
+            Lumino Translator 
+        </a>
 
         <div class="selection">
-            <button id="scenario" type="button" onclick="toggleDropdown()"><i class="bi bi-card-list"></i> Scenario <i class="bi bi-caret-down-fill"></i></button>
+            <button id="scenario" type="button" onclick="toggleDropdown()">
+                <i class="bi bi-card-list"></i> 
+                Scenario 场景 
+                <i class="bi bi-caret-down-fill"></i>
+            </button>
             <form action="/" method="GET" id="context">
                 <input name="context" type="hidden" id="selected_context">
                 <div class="select_content" id="select_context">
@@ -24,11 +29,33 @@
             </form>
         </div>
 
-        <button id="mic-btn"><i class="bi bi-mic-fill"></i>Start</button>
+        <button id="CNTranslate"><i class="bi bi-mic-fill"></i> 
+            CN 中文
+        </button>
 
-        <button id="switch-language"><i class="bi bi-translate"></i> {{ 'Switch to Chinese' if language == 'EN' else 'Switch to English' }}</button>
+        <button id="ENTranslate"><i class="bi bi-mic-fill"></i> 
+            EN 英文
+        </button>
 
-        <button id="clearConversation"><i class="bi bi-trash-fill"></i> Clear</button>
+        <!-- <button id="stop"><i class="bi bi-mic-fill"></i> 
+            STOP
+        </button> -->
+
+        <!-- <button id="stop"><i class="bi bi-mic-fill"></i> 
+            STOP
+        </button>
+
+        <button id="mic-btn"><i class="bi bi-mic-fill"></i> 
+            Start 开始录音
+        </button>
+
+        <button id="switch-language"><i class="bi bi-translate"></i> 
+            {{ '切换到中文' if language == 'EN' else 'Switch to English 切换到英文' }}
+        </button> -->
+
+        <button id="clearConversation"><i class="bi bi-trash-fill"></i> 
+            Clear 清空屏幕 
+        </button>
     </nav>
 
     <form action="/" method="get" id="mic">
@@ -48,8 +75,8 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.min.js"></script>
 <script>
     function selectContext(value) {
-    document.getElementById('selected_context').value = value;
-    document.getElementById('context').submit();
+        document.getElementById('selected_context').value = value;
+        document.getElementById('context').submit();
     }
 
     document.querySelectorAll('#select_context a').forEach(item => {
@@ -60,51 +87,130 @@
             document.getElementById('selectionForm').submit(); // Submit the form
         });
     });
+
     // Start to record function 
     document.addEventListener('DOMContentLoaded', function() {
     const socket = io();
-    const micBtn = document.getElementById("mic-btn");
+    // const micBtn = document.getElementById("mic-btn");
     const chatWindow = document.querySelector('.chat');
     let recognitionStarted = false;
     let currentLanguage = '{{ language }}';
     let currentMessageContainer = null;
 
-    micBtn.addEventListener("click", function() {
+    const CNBtn = document.getElementById('CNTranslate');
+    const ENBtn = document.getElementById('ENTranslate');
+
+    // Press the CNTranslate button
+    // If it is not recording, start recording Chinese and translate to English
+    // If it is recording Chinese and translating to English, stop the recording 
+    // If it is recording English and translating to Chinese, stop the recording
+    // and start recording Chinese and translating to English
+    CNBtn.addEventListener("click", function() {
         if (!recognitionStarted) {
+            // Check if the current language is English, if so, switch to Chinese
+            if (currentLanguage === 'EN') {
+                socket.emit('switch_language');
+            }
+            // Start CN to EN translation
             socket.emit('start_recognition');
             recognitionStarted = true;
-            micBtn.innerHTML = '<i class="bi bi-stop-fill"></i> Stop';
+            CNBtn.innerHTML = '<i class="bi bi-stop-fill"></i> Stop 停止录音 1';
         } else {
             socket.emit('stop_recognition');
             recognitionStarted = false;
-            micBtn.innerHTML = '<i class="bi bi-mic-fill"></i> Start';
-            currentMessageContainer = null; // Reset current message container when stopping
+            currentMessageContainer = null; 
+            if (currentLanguage === 'EN') {
+                ENBtn.innerHTML = '<i class="bi bi-mic-fill"></i> EN 英文';
+
+                socket.emit('switch_language');
+
+                socket.emit('start_recognition');
+                recognitionStarted = true;
+                CNBtn.innerHTML = '<i class="bi bi-stop-fill"></i> Stop 停止录音2';
+            } else {
+                CNBtn.innerHTML = '<i class="bi bi-mic-fill"></i> CN 中文';
+            }
         }
     });
 
-    document.getElementById('switch-language').addEventListener('click', function() {
+    // Press the ENTranslate button
+    // If it is not recording, start recording English and translate to Chinese
+    // If it is recording English and translating to Chinese, stop the recording
+    // If it is recording Chinese and translating to English, stop the recording and start recording English and translating to Chinese
+    ENBtn.addEventListener("click", function() {
+        if (!recognitionStarted) {
+            // Check if the current language is Chinese, if so, switch to English
+            if (currentLanguage === 'ZH') {
+                socket.emit('switch_language');
+            }
+            // Start EN to CN translation
+            socket.emit('start_recognition');
+            recognitionStarted = true;
+            ENBtn.innerHTML = '<i class="bi bi-stop-fill"></i> Stop 停止录音 1';
+        } else {
+            socket.emit('stop_recognition');
+            recognitionStarted = false;
+            currentMessageContainer = null;
+            if (currentLanguage === 'ZH') {
+                CNBtn.innerHTML = '<i class="bi bi-mic-fill"></i> CN 中文';
+
+                socket.emit('switch_language');
+
+                socket.emit('start_recognition');
+                recognitionStarted = true;
+                ENBtn.innerHTML = '<i class="bi bi-stop-fill"></i> Stop 停止录音 2';
+            } else {
+                ENBtn.innerHTML = '<i class="bi bi-mic-fill"></i> EN 英文';
+            }
+        }
+    });
+
+    document.getElementById('stop').addEventListener('click', function() {
         if (recognitionStarted) {
-            alert('The conversation is still ongoing, please switch after ending the session.');
-        } else {
-            socket.emit('switch_language');
+            socket.emit('stop_recognition');
+            recognitionStarted = false;
+            CNBtn.innerHTML = '<i class="bi bi-mic-fill"></i> CN 中文';
+            ENBtn.innerHTML = '<i class="bi bi-mic-fill"></i> EN 英文';
+            currentMessageContainer = null; 
         }
     });
 
-    socket.on('can_switch_language', function(data) {
-        if (data.can_switch) {
-            socket.emit('confirm_switch_language');
-        } else {
-            alert('The conversation is still ongoing, please switch after ending the session.');
-        }
-    });
+    // micBtn.addEventListener("click", function() {
+    //     if (!recognitionStarted) {
+    //         socket.emit('start_recognition');
+    //         recognitionStarted = true;
+    //         micBtn.innerHTML = '<i class="bi bi-stop-fill"></i> Stop 停止录音';
+    //     } else {
+    //         socket.emit('stop_recognition');
+    //         recognitionStarted = false;
+    //         micBtn.innerHTML = '<i class="bi bi-mic-fill"></i> Start 开始录音';
+    //         currentMessageContainer = null; // Reset current message container when stopping
+    //     }
+    // });
+
+    // document.getElementById('switch-language').addEventListener('click', function() {
+    //     if (recognitionStarted) {
+    //         alert('The conversation is still ongoing, please switch after ending the session.');
+    //     } else {
+    //         socket.emit('switch_language');
+    //     }
+    // });
+
+    // socket.on('can_switch_language', function(data) {
+    //     if (data.can_switch) {
+    //         socket.emit('confirm_switch_language');
+    //     } else {
+    //         alert('The conversation is still ongoing, please switch after ending the session.');
+    //     }
+    // });
 
     socket.on('language_switched', function(data) {
-        const switchButton = document.getElementById('switch-language');
+        // const switchButton = document.getElementById('switch-language');
         if (data.new_language == 'EN') {
-            switchButton.innerHTML = '<i class="bi bi-translate"></i> Switch to Chinese';
+            // switchButton.innerHTML = '<i class="bi bi-translate"></i> Switch to Chinese 切换到中文';
             currentLanguage = 'EN';
         } else {
-            switchButton.innerHTML = '<i class="bi bi-translate"></i> Switch to English';
+            // switchButton.innerHTML = '<i class="bi bi-translate"></i> Switch to English 切换到英文';
             currentLanguage = 'ZH';
         }
     });
@@ -123,9 +229,6 @@
     socket.on('error', function(data) {
         console.error(data.error);
     });
-
-    // Function to detect the speaking language, generate by ChatGPT
-    
 
     // Function to add the message to the chat window
     function addChatMessage(recognizedText, translatedText, generatedText, language, isNewLine) {
@@ -222,20 +325,6 @@
             }
         }
     };
-
-    // // Change the select option front size
-    // document.querySelectorAll('#select_context a').forEach(function(item) {
-    // item.addEventListener('click', function() {
-    //     var button = document.getElementById('scenario');
-    //     button.innerHTML = '<i class="bi bi-card-list"></i> ' + this.textContent + ' <i class="bi bi-caret-down-fill"></i>'; 
-        
-    //     button.style.width = ""; 
-    //     button.style.width = button.scrollWidth + "px";
-
-    //     button.classList.remove('active');
-    //     document.getElementById('select_context').classList.remove('show');
-    //     });
-    // });
 
     document.addEventListener('DOMContentLoaded', function() {
         const urlParams = new URLSearchParams(window.location.search);
