@@ -11,7 +11,6 @@
     <nav class="navbar navbar-expand-md">
         <a class="navbar-brand" href="{{ url_for('index')}}">Lumino</a>
 
-
         <div class="selection">
             <button id="scenario" type="button" onclick="toggleDropdown()"><i class="bi bi-card-list"></i> Scenario <i class="bi bi-caret-down-fill"></i></button>
             <form action="/" method="GET" id="context">
@@ -68,6 +67,7 @@
     let recognitionStarted = false;
     let currentLanguage = '{{ language }}';
     let currentMessageContainer = null;
+    let switched_language = false; // Track if the language has been switched
 
     micBtn.addEventListener("click", function() {
         if (!recognitionStarted) {
@@ -83,19 +83,7 @@
     });
 
     document.getElementById('switch-language').addEventListener('click', function() {
-        if (recognitionStarted) {
-            alert('The conversation is still ongoing, please switch after ending the session.');
-        } else {
-            socket.emit('switch_language');
-        }
-    });
-
-    socket.on('can_switch_language', function(data) {
-        if (data.can_switch) {
-            socket.emit('confirm_switch_language');
-        } else {
-            alert('The conversation is still ongoing, please switch after ending the session.');
-        }
+        socket.emit('switch_language');
     });
 
     socket.on('language_switched', function(data) {
@@ -107,6 +95,8 @@
             switchButton.innerHTML = '<i class="bi bi-translate"></i> Switch to English';
             currentLanguage = 'ZH';
         }
+
+        switched_language = true;
     });
 
     socket.on('recognition_result', function(data) {
@@ -123,8 +113,6 @@
     socket.on('error', function(data) {
         console.error(data.error);
     });
-
-    // Function to detect the speaking language, generate by ChatGPT
     
 
     // Function to add the message to the chat window
@@ -135,7 +123,7 @@
             return;
         }
 
-        if (isNewLine || currentMessageContainer === null) {
+        if (switched_language || isNewLine || currentMessageContainer === null) {
             // Create a new message container
             currentMessageContainer = document.createElement('div');
             currentMessageContainer.classList.add('message-container');
@@ -146,7 +134,7 @@
             const speakIcon = document.createElement('i');
             speakIcon.className = 'bi bi-megaphone-fill';
             languageMessage.appendChild(speakIcon);
-            languageMessage.append(' Recognised: ' + (language === 'EN' ? 'English' : 'Chinese'));  
+            languageMessage.append(' Recognised: ' + (language === 'EN' ? 'English' : 'Chinese'));
             currentMessageContainer.appendChild(languageMessage);
 
             const userMessage = document.createElement('div');
@@ -160,7 +148,7 @@
             const translateIcon = document.createElement('i');
             translateIcon.className = 'bi bi-translate';
             translationLanguageMessage.appendChild(translateIcon);
-            translationLanguageMessage.append(' Translation: ' + (language === 'EN' ? 'Chinese' : 'English'));  
+            translationLanguageMessage.append(' Translation: ' + (language === 'EN' ? 'Chinese' : 'English'));
             currentMessageContainer.appendChild(translationLanguageMessage);
 
             const botMessage = document.createElement('div');
@@ -175,6 +163,9 @@
             currentMessageContainer.appendChild(bMessage);
 
             chatContainer.appendChild(currentMessageContainer);
+
+            // After creating the new container, reset switched_language to false
+            switched_language = false;
         } else {
             // Update the existing message container
             const userMessage = currentMessageContainer.querySelector('.message.user');

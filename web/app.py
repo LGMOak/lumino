@@ -124,9 +124,26 @@ def handle_switch_language():
     """
     Handle the 'switch_language' event from the client to switch the speaking language.
     """
-    global recognition_thread
-    can_switch = not (recognition_thread and recognition_thread.is_alive())
-    emit('can_switch_language', {'can_switch': can_switch})
+    global recognition_thread, lumino_instance
+
+    # Check current language
+    print(f"Current Language: {lumino_instance.spoken_language}")
+    new_language = 'ZH' if lumino_instance.spoken_language == 'EN' else 'EN'
+    print(f"Switching to Language: {new_language}")
+
+    lumino_instance.set_language(new_language)
+
+    # Emit events
+    emit('language_switched', {'new_language': new_language})
+    emit('status', {'status': f'Language switched to {new_language}'})
+
+    # If the recognition thread is running
+    if recognition_thread and recognition_thread.is_alive():
+        # restart instance
+        handle_stop_recognition()
+        handle_start_recognition()
+    else:
+        print("Recognition is not running, language switched without restart.")
 
 @socketio.on('confirm_switch_language')
 def handle_confirm_switch_language():
