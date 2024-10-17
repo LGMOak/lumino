@@ -1,10 +1,7 @@
 ## DECO3801 Lumino
-lumino.py holds all the functionality and can be run on its own for testing.
-app.py is the main file that hosts the flask website and connects all functionality.
-speech.py, translate.py and generate.py are all standalone programs for speech recognition / transcription, text translation and AI context generation respectively. These are simple examples for testing and can each be run on their own.
-Requires an API key to generative LLM. Google's Gemini currently implemented. Support for OpenAI and Antrhoptic. 
-Translation using DeepL requires API key. Google Translate does not require API key
+**Lumino** is an AI-powered translation web service designed specifically for elderly Chinese immigrants living in Australia. Aimed at bridging language barriers, Lumino offers context-aware translation services that account for the intricacies and colloquialisms of both English and Chinese. The application facilitates seamless communication through features like speech recognition and transcription, utilizing technologies such as SpeechRecognition and OpenAI's Whisper. Translation is powered by DeepL, while context generation is handled by Google Gemini, ensuring users receive relevant and accurate translations. Lumino is thoughtfully crafted to assist elderly users in essential scenarios, including medical appointments and interactions with social services.
 
+![lumino.gif](lumino.gif)
 ## Library Requirements
 ```python
 pip install -r requirements.txt
@@ -25,6 +22,24 @@ Lumino makes use of:
 - google-generativeai
 
 If issues occur, remove the strict version requirement in requirements.txt and install the latest version of each package
+
+## Usage
+
+- web/lumino.py: This file contains all the core functionality of the application. You can run it independently for testing purposes.
+
+- web/app.py: This is the main file that serves the Flask web application. It connects all the functionalities together and manages user interactions.
+
+- speech.py: A standalone program that handles speech recognition and transcription. It can be run independently for testing.
+
+- translate.py: A standalone program for translating text. This can also be executed separately for testing.
+
+- generate.py: This standalone program is responsible for generating AI context. Like the others, it can be run on its own for testing.
+
+### API Requirements
+To use the generative LLM features, an API key is required. Currently, Google’s Gemini is implemented, with support for OpenAI and Anthropic as well.
+Translation:
+- DeepL requires an API key for use.
+- Google Translate does not require an API key.
 
 ## Installation instructions
 Python v3.12.x is recommended version of python. It is also highly recommended to create a new venv to run this application
