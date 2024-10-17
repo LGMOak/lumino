@@ -97,6 +97,15 @@
         document.getElementById('context').submit();
     }
 
+    document.querySelectorAll('#select_context a').forEach(item => {
+        item.addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent the default anchor behavior
+            const selectedValue = this.getAttribute('data-value');
+            document.getElementById('selected_option').value = selectedValue; // Set the hidden input
+            document.getElementById('selectionForm').submit(); // Submit the form
+        });
+    });
+
     // Microphone button event handler to control start/stop of speech recognition
     document.addEventListener('DOMContentLoaded', function() {
         const socket = io();
