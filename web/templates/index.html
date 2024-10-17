@@ -12,15 +12,49 @@
         <a class="navbar-brand" href="{{ url_for('index')}}">Lumino</a>
 
         <div class="selection">
-            <button id="scenario" type="button" onclick="toggleDropdown()"><i class="bi bi-card-list"></i> Scenario <i class="bi bi-caret-down-fill"></i></button>
+            <button id="scenario" type="button" onclick="toggleDropdown()" class="d-flex align-items-center">
+                <i class="bi bi-card-list"></i>
+                <span class="ms-2">Scenario</span>
+                <i class="bi bi-caret-down-fill ms-2"></i>
+            </button>
+
             <form action="/" method="GET" id="context">
                 <input name="context" type="hidden" id="selected_context">
                 <div class="select_content" id="select_context">
-                    {% for scen in contexts.keys() %}
-                    <a href="/" class="scenario-link" onclick="selectContext('{{ scen }}', this)">{{ scen }}</a>
+                    {% for scen, desc in contexts.items() %}
+                    <div class="d-flex justify-content-between align-items-center">
+                        <!-- Scenario Link -->
+                        <a href="/" class="scenario-link" onclick="selectContext('{{ scen }}', this)">{{ scen }}</a>
+
+                        <!-- Help Icon with data-attribute holding description -->
+                        <a href="#" class="help-icon"
+                           data-bs-toggle="modal"
+                           data-bs-target="#myModal"
+                           title="Help"
+                           onclick="showDescription('{{ desc }}', this)">
+                            <i class="bi bi-question-circle"></i>
+                        </a>
+
+                        <!-- Hidden description (optional, you can use a data attribute instead) -->
+                        <span class="d-none description" data-desc="{{ desc }}"></span>
+                    </div>
                     {% endfor %}
                 </div>
             </form>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <p id="modal-description">This is a placeholder description.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <button id="mic-btn"><i class="bi bi-mic-fill"></i>Start</button>
@@ -201,6 +235,18 @@
         dropdownMenu.classList.toggle('show');
         button.classList.toggle('active');
     });
+
+    function showDescription(desc, element) {
+        // Find the modal body
+        var modalDescription = document.getElementById('modal-description');
+
+        // Update the modal description with the passed `desc`
+        modalDescription.textContent = desc;
+
+        // Optional: You can also store the clicked scenario for other use cases
+        var selectedScenario = element.closest('.d-flex').querySelector('.scenario-link').textContent;
+        document.getElementById('selected_context').value = selectedScenario;
+    }
 
     window.onclick = function(event) {
         if (!event.target.matches('#scenario') && !event.target.matches('#scenario *')) {
