@@ -23,14 +23,14 @@
         </button>
 
         <!-- Scenario selection form, with a hidden input to store the selected scenario value -->
-        <form action="/" method="GET" id="context">
+        <form action="/zh" method="GET" id="context">
             <input name="context" type="hidden" id="selected_context">
             <div class="select_content" id="select_context">
                 <!-- Loop through each scenario to display -->
                 {% for scen, desc in contexts.items() %}
                 <div class="d-flex justify-content-between align-items-center">
                     <!-- Scenario link, submits the selected scenario -->
-                    <a href="/" class="scenario-link" onclick="selectContext('{{ scen }}', this)">{{ scen }}</a>
+                    <a href="/zh" class="scenario-link" onclick="selectContext('{{ scen }}', this)">{{ scen }}</a>
 
                     <!-- Help icon, shows a modal with the scenario description -->
                     <a href="#" class="help-icon"
@@ -47,20 +47,6 @@
                 {% endfor %}
             </div>
         </form>
-    </div>
-
-    <!-- Modal to display help description -->
-    <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <p id="modal-description">This is a placeholder description.</p> <!-- Placeholder text for modal -->
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Microphone button for starting/stopping speech recognition -->
@@ -81,7 +67,7 @@
 </nav>
 
 <!-- Form to select microphone, submits automatically on change -->
-<form action="/" method="get" id="mic">
+<form action="/zh" method="get" id="mic">
     <label for="microphone">选择麦克风:</label>
     <select name="microphone" id="microphone" onchange="this.form.submit()">
         {% for mic in mics %}
