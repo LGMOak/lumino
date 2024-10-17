@@ -1,0 +1,310 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<!-- Link to the custom stylesheet -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% endblock %}
+
+{% block content %}
+<body>
+
+<!-- Top navigation bar, including app name and buttons -->
+<nav class="navbar navbar-expand-md">
+    <!-- App name linked to the home page -->
+    <a class="navbar-brand" href="{{ url_for('index')}}">Lumino</a>
+
+    <!-- Scenario selection area -->
+    <div class="selection">
+        <!-- Scenario selection button, shows a dropdown on click -->
+        <button id="scenario" type="button" onclick="toggleDropdown()" class="d-flex align-items-center">
+            <i class="bi bi-card-list"></i>
+            <span class="ms-2">场景</span>
+            <i class="bi bi-caret-down-fill ms-2"></i>
+        </button>
+
+        <!-- Scenario selection form, with a hidden input to store the selected scenario value -->
+        <form action="/" method="GET" id="context">
+            <input name="context" type="hidden" id="selected_context">
+            <div class="select_content" id="select_context">
+                <!-- Loop through each scenario to display -->
+                {% for scen, desc in contexts.items() %}
+                <div class="d-flex justify-content-between align-items-center">
+                    <!-- Scenario link, submits the selected scenario -->
+                    <a href="/" class="scenario-link" onclick="selectContext('{{ scen }}', this)">{{ scen }}</a>
+
+                    <!-- Help icon, shows a modal with the scenario description -->
+                    <a href="#" class="help-icon"
+                       data-bs-toggle="modal"
+                       data-bs-target="#myModal"
+                       title="Help"
+                       onclick="showDescription('{{ desc }}', this)">
+                        <i class="bi bi-question-circle"></i>
+                    </a>
+
+                    <!-- Hidden description (optional, data attribute can be used instead) -->
+                    <span class="d-none description" data-desc="{{ desc }}"></span>
+                </div>
+                {% endfor %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Modal to display help description -->
+    <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <p id="modal-description">This is a placeholder description.</p> <!-- Placeholder text for modal -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Microphone button for starting/stopping speech recognition -->
+    <button id="mic-btn"><i class="bi bi-mic-fill"></i>启动</button>
+
+    <!-- Language switch button, displays the language that can be switched to -->
+    <button id="switch-language"><i class="bi bi-translate"></i> {{ '将扬声器切换为中文' if language == 'EN' else '将扬声器切换为英语' }}</button>
+
+    <!-- Clear conversation button -->
+    <button id="clearConversation"><i class="bi bi-trash-fill"></i>清除</button>
+
+    <div class="selection">
+        <select id="dropdown" class="form-control" onchange="redirectToPage()">
+            <option value="/">EN 🇦🇺</option>
+            <option value="/zh" selected>ZH 🇨🇳</option>
+        </select>
+    </div>
+</nav>
+
+<!-- Form to select microphone, submits automatically on change -->
+<form action="/" method="get" id="mic">
+    <label for="microphone">选择麦克风:</label>
+    <select name="microphone" id="microphone" onchange="this.form.submit()">
+        {% for mic in mics %}
+        <option value="{{ loop.index0 }}" {% if mic == mic_name %} selected {% endif %}>{{ mic }}</option>
+        {% endfor %}
+    </select>
+</form>
+
+<!-- Chat window to dynamically display recognition and translation content -->
+<div class="chat"></div>
+
+</body>
+
+<!-- JavaScript section -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.min.js"></script>
+<script>
+    document.querySelectorAll('#select_context a').forEach(item => {
+        item.addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent the default anchor behavior
+            const selectedValue = this.getAttribute('data-value');
+            document.getElementById('selected_option').value = selectedValue; // Set the hidden input
+            document.getElementById('selectionForm').submit(); // Submit the form
+        });
+    });
+
+    // Select the scenario and submit the form
+    function selectContext(value) {
+        document.getElementById('selected_context').value = value;
+        document.getElementById('context').submit();
+    }
+
+    // Microphone button event handler to control start/stop of speech recognition
+    document.addEventListener('DOMContentLoaded', function() {
+        const socket = io();
+        const micBtn = document.getElementById("mic-btn");
+        const chatWindow = document.querySelector('.chat');
+        let recognitionStarted = false;
+        let currentLanguage = '{{ language }}';
+        let currentMessageContainer = null;
+        let switched_language = false; // Track if the language has been switched
+
+        micBtn.addEventListener("click", function() {
+            if (!recognitionStarted) {
+                socket.emit('start_recognition');
+                recognitionStarted = true;
+                micBtn.innerHTML = '<i class="bi bi-stop-fill"></i> Stop';
+            } else {
+                socket.emit('stop_recognition');
+                recognitionStarted = false;
+                micBtn.innerHTML = '<i class="bi bi-mic-fill"></i> Start';
+                currentMessageContainer = null; // Reset current message container when stopping
+            }
+        });
+
+        // Language switch button event handler
+        document.getElementById('switch-language').addEventListener('click', function() {
+            socket.emit('switch_language');
+        });
+
+        // Receive language switched event from the server
+        socket.on('language_switched', function(data) {
+            const switchButton = document.getElementById('switch-language');
+            if (data.new_language == 'EN') {
+                switchButton.innerHTML = '<i class="bi bi-translate"></i> Switch to Chinese';
+                currentLanguage = 'EN';
+            } else {
+                switchButton.innerHTML = '<i class="bi bi-translate"></i> Switch to English';
+                currentLanguage = 'ZH';
+            }
+
+            switched_language = true;
+        });
+
+        // Receive speech recognition result and update the chat window
+        socket.on('recognition_result', function(data) {
+            if (data.recognized_text && data.translated_text) {
+                const language = data.language;
+                addChatMessage(data.recognized_text, data.translated_text, data.generated_context, language, data.is_new_line);
+            }
+        });
+
+        // Print status message from the server to console
+        socket.on('status', function(data) {
+            console.log(data.status);
+        });
+
+        // Print error message from the server to console
+        socket.on('error', function(data) {
+            console.error(data.error);
+        });
+
+        // Add message to the chat window
+        function addChatMessage(recognizedText, translatedText, generatedText, language, isNewLine) {
+            const chatContainer = document.querySelector('.chat');
+            if (!chatContainer) {
+                console.error('Cannot find the chat Container');
+                return;
+            }
+
+            if (switched_language || isNewLine || currentMessageContainer === null) {
+                // Create a new message container
+                currentMessageContainer = document.createElement('div');
+                currentMessageContainer.classList.add('message-container');
+
+                // Handle recognition language
+                const languageMessage = document.createElement('div');
+                languageMessage.classList.add('message', 'language');
+                const speakIcon = document.createElement('i');
+                speakIcon.className = 'bi bi-megaphone-fill';
+                languageMessage.appendChild(speakIcon);
+                languageMessage.append(' Recognised: ' + (language === 'EN' ? 'English' : 'Chinese'));
+                currentMessageContainer.appendChild(languageMessage);
+
+                // User message
+                const userMessage = document.createElement('div');
+                userMessage.classList.add('message', 'user');
+                userMessage.textContent = recognizedText;
+                currentMessageContainer.appendChild(userMessage);
+
+                // Translation language
+                const translationLanguageMessage = document.createElement('div');
+                translationLanguageMessage.classList.add('message', 'language');
+                const translateIcon = document.createElement('i');
+                translateIcon.className = 'bi bi-translate';
+                translationLanguageMessage.appendChild(translateIcon);
+                translationLanguageMessage.append(' Translation: ' + (language === 'EN' ? 'Chinese' : 'English'));
+                currentMessageContainer.appendChild(translationLanguageMessage);
+
+                // Bot translated message
+                const botMessage = document.createElement('div');
+                botMessage.classList.add('message', 'translation');
+                botMessage.textContent = translatedText;
+                currentMessageContainer.appendChild(botMessage);
+
+                // Generated context
+                const bMessage = document.createElement('div');
+                bMessage.classList.add('message', 'generated');
+                bMessage.textContent = 'Context: ' + generatedText;
+                currentMessageContainer.appendChild(bMessage);
+
+                chatContainer.appendChild(currentMessageContainer);
+
+                // Reset switched language flag
+                switched_language = false;
+            } else {
+                // Update the existing message container
+                const userMessage = currentMessageContainer.querySelector('.message.user');
+                const botMessage = currentMessageContainer.querySelector('.message.translation');
+                const bMessage = currentMessageContainer.querySelector('.message.generated');
+
+                if (userMessage) userMessage.textContent = recognizedText;
+                if (botMessage) botMessage.textContent = translatedText;
+                if (bMessage) bMessage.textContent = 'Context: ' + generatedText;
+            }
+
+            // Scroll chat window to the bottom
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+    });
+
+    // Clear conversation button event handler
+    document.getElementById('clearConversation').addEventListener('click', function() {
+        localStorage.removeItem('conversation');
+
+        const chatContainer = document.querySelector('.chat');
+        if (chatContainer) {
+            chatContainer.innerHTML = '';
+        } else {
+            console.error('Cannot find the chat Container');
+        }
+    });
+
+    // Show and hide scenario dropdown menu
+    document.getElementById('scenario').addEventListener('click', function() {
+        var dropdownMenu = document.getElementById('select_context');
+        var button = this;
+
+        dropdownMenu.classList.toggle('show');
+        button.classList.toggle('active');
+    });
+
+    // Function to show help description in modal
+    function showDescription(desc, element) {
+        var modalDescription = document.getElementById('modal-description');
+        modalDescription.textContent = desc;
+
+        // Optional: Store the selected scenario for other use cases
+        var selectedScenario = element.closest('.d-flex').querySelector('.scenario-link').textContent;
+        document.getElementById('selected_context').value = selectedScenario;
+    }
+
+    // Hide dropdown menu when clicking outside of it
+    window.onclick = function(event) {
+        if (!event.target.matches('#scenario') && !event.target.matches('#scenario *')) {
+            var dropdownMenu = document.getElementById('select_context');
+            var button = document.getElementById('scenario');
+
+            if (dropdownMenu.classList.contains('show')) {
+                dropdownMenu.classList.remove('show');
+                button.classList.remove('active');
+            }
+        }
+    };
+
+    // Set selected scenario based on URL parameters when the page is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const selectedContext = urlParams.get('context');
+
+        if (selectedContext) {
+            var button = document.getElementById('scenario');
+            button.innerHTML = '<i class="bi bi-card-list"></i> ' + selectedContext + ' <i class="bi bi-caret-down-fill"></i>';
+        }
+    });
+
+    function redirectToPage() {
+            const dropdown = document.getElementById("dropdown");
+            const selectedValue = dropdown.value;
+            if (selectedValue) {
+                window.location.href = selectedValue;
+            }
+        }
+
+</script>
+
+{% endblock %}

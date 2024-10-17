@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, session, send_file
 from flask_socketio import SocketIO, emit
+from flask_babel import Babel, _
 from lumino import Lumino
 from threading import Thread
 from speech_recognition import Microphone
@@ -8,8 +9,15 @@ import json
 
 # Initialize the Flask application
 app = Flask(__name__)
+babel = Babel(app)
 app.config['SECRET_KEY'] = 'secret!'  # Set the secret key for session management
 socketio = SocketIO(app)  # Wrap the app with SocketIO to enable WebSocket support
+
+# Supported languages
+LANGUAGES = {
+    'en': 'English',
+    'zh': '中文'
+}
 
 # Global variables to manage the Lumino instance and threading
 lumino_instance = Lumino()        # Holds the instance of the Lumino class
@@ -71,6 +79,44 @@ def index():
 
     # Render the index.html template with the selected values and options
     return render_template('index.html', language=lumino_instance.spoken_language, mics=audio_sources,
+                           selected_mic=selected_microphone, mic_name=audio_sources[int(selected_microphone)],
+                           selected_context=selected_context, contexts=scenarios)
+
+@app.route("/zh")
+def index_zh():
+    """
+    Handle the root URL and render the main page.
+
+    The main page allows users to select a microphone, set a context, and select the language.
+    These selections are saved in the session for subsequent requests.
+
+    Returns:
+        Rendered HTML template for the index page.
+    """
+    selected_microphone = session.get('microphone', 0)  # Get the selected microphone from the session
+    selected_context = session.get('context', 'General')  # Get the selected context from the session
+    selected_language = session.get('lang', 'EN')  # Get the selected language from the session
+
+    scenarios = lumino_instance.get_scenarios()  # Get available scenarios for translation
+
+    # Update session with selected microphone, context, and language if they exist in request arguments
+    if 'microphone' in request.args:
+        selected_microphone = request.args.get('microphone')
+        session['microphone'] = selected_microphone
+        lumino_instance.set_input_source(int(selected_microphone))
+
+    if 'context' in request.args:
+        selected_context = request.args.get('context')
+        session['context'] = selected_context
+        lumino_instance.set_context(selected_context)
+
+    if 'lang' in request.args:
+        selected_language = request.args.get('lang')
+        session['lang'] = selected_language
+        lumino_instance.set_language(selected_language)
+
+    # Render the index.html template with the selected values and options
+    return render_template('index_zh.html', language=lumino_instance.spoken_language, mics=audio_sources,
                            selected_mic=selected_microphone, mic_name=audio_sources[int(selected_microphone)],
                            selected_context=selected_context, contexts=scenarios)
 
@@ -157,9 +203,20 @@ def handle_switch_language():
     
     Switches between English and Chinese and emits the new language status to the client.
     """
-    global recognition_thread
-    can_switch = not (recognition_thread and recognition_thread.is_alive())  # Allow language switch only if no recognition is running
-    emit('can_switch_language', {'can_switch': can_switch})
+    global recognition_thread, lumino_instance
+    # Check current language
+    new_language = 'ZH' if lumino_instance.spoken_language == 'EN' else 'EN'
+    lumino_instance.set_language(new_language)
+    # Emit events
+    emit('language_switched', {'new_language': new_language})
+    emit('status', {'status': f'Language switched to {new_language}'})
+    # If the recognition thread is running
+    if recognition_thread and recognition_thread.is_alive():
+        # restart instance
+        handle_stop_recognition()
+        handle_start_recognition()
+    else:
+        print("Recognition is not running, language switched without restart.")
 
 @socketio.on('confirm_switch_language')
 def handle_confirm_switch_language():
