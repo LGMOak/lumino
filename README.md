@@ -1,5 +1,6 @@
 ## DECO3801 Lumino
 **Lumino** is an AI-powered translation web service designed specifically for elderly Chinese immigrants living in Australia. Aimed at bridging language barriers, Lumino offers context-aware translation services that account for the intricacies and colloquialisms of both English and Chinese. The application facilitates seamless communication through features like speech recognition and transcription, utilizing technologies such as SpeechRecognition and OpenAI's Whisper. Translation is powered by DeepL, while context generation is handled by Google Gemini, ensuring users receive relevant and accurate translations. Lumino is thoughtfully crafted to assist elderly users in essential scenarios, including medical appointments and interactions with social services.
+
 ![lumino.gif](lumino.gif)
 
 ## Library Requirements
