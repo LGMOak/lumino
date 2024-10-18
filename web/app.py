@@ -56,7 +56,7 @@ def index():
         Rendered HTML template for the index page.
     """
     selected_microphone = session.get('microphone', 0)  # Get the selected microphone from the session
-    selected_context = session.get('context', 'General')  # Get the selected context from the session
+    selected_context = session.get('context', 'General 通用')  # Get the selected context from the session
     selected_language = session.get('lang', 'EN')  # Get the selected language from the session
 
     scenarios = lumino_instance.get_scenarios()  # Get available scenarios for translation

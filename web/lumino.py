@@ -31,7 +31,7 @@ class Lumino:
             "Social Services 社会服务": "This context involves conversations related to government services and welfare programs in Australia, such as Centrelink (financial assistance), Medicare (public healthcare), superannuation (retirement savings), pensions, taxes, and other services that assist in everyday living. It includes discussions about applying for benefits, understanding rights and entitlements, navigating bureaucracy, and engaging with service providers. The language should be clear, straightforward, and possibly include formal or legal terminology often used in public services.",
             "Medical Services 医疗": "This context focuses on medical-related conversations, including interactions with healthcare professionals like general practitioners (GPs), hospitals, physiotherapists, pharmacists, and nurses. It covers discussions about appointments, medical treatments, prescriptions, health advice, and explanations of medical conditions. In this context, the language is both technical (with medical terminology) and conversational, reflecting the seriousness of healthcare while remaining accessible for patients, especially those unfamiliar with medical terms. Understanding the correct use of terminology is key to avoid confusion."
         }
-        self.selected_scenario = "General"  # Default scenario
+        self.selected_scenario = "General 通用"  # Default scenario
         self.line_time = None
         self.audio_queue = Queue()  # Queue for storing audio data
         self.recognizer = sr.Recognizer()  # Initialize speech recognizer
@@ -60,7 +60,7 @@ class Lumino:
             str: Translated text.
         """
         translator = deepl.Translator(DEEPL_API_KEY)
-        formality = 'prefer_less' if self.get_context() not in ["Medical", "Services"] else 'prefer_more'
+        formality = 'prefer_less' if self.get_context() not in ["Medical Services 医疗", "Social Services 社会服务"] else 'prefer_more'
         return translator.translate_text(text=text, source_lang=source, target_lang=target,
                                          context=self.get_scenarios()[self.get_context()], formality=formality).text
 
