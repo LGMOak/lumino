@@ -164,7 +164,7 @@ class Lumino:
         """
         print("Setting up microphone")
         if self.source is None:
-            self.source = sr.Microphone(14, sample_rate=16000)
+            self.source = sr.Microphone(sample_rate=16000)
 
         with self.source as source:
             try:
