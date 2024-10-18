@@ -82,44 +82,6 @@ def index():
                            selected_mic=selected_microphone, mic_name=audio_sources[int(selected_microphone)],
                            selected_context=selected_context, contexts=scenarios)
 
-@app.route("/zh")
-def index_zh():
-    """
-    Handle the root URL and render the main page.
-
-    The main page allows users to select a microphone, set a context, and select the language.
-    These selections are saved in the session for subsequent requests.
-
-    Returns:
-        Rendered HTML template for the index page.
-    """
-    selected_microphone = session.get('microphone', 0)  # Get the selected microphone from the session
-    selected_context = session.get('context', 'General')  # Get the selected context from the session
-    selected_language = session.get('lang', 'EN')  # Get the selected language from the session
-
-    scenarios = lumino_instance.get_scenarios()  # Get available scenarios for translation
-
-    # Update session with selected microphone, context, and language if they exist in request arguments
-    if 'microphone' in request.args:
-        selected_microphone = request.args.get('microphone')
-        session['microphone'] = selected_microphone
-        lumino_instance.set_input_source(int(selected_microphone))
-
-    if 'context' in request.args:
-        selected_context = request.args.get('context')
-        session['context'] = selected_context
-        lumino_instance.set_context(selected_context)
-
-    if 'lang' in request.args:
-        selected_language = request.args.get('lang')
-        session['lang'] = selected_language
-        lumino_instance.set_language(selected_language)
-
-    # Render the index.html template with the selected values and options
-    return render_template('index_zh.html', language=lumino_instance.spoken_language, mics=audio_sources,
-                           selected_mic=selected_microphone, mic_name=audio_sources[int(selected_microphone)],
-                           selected_context=selected_context, contexts=scenarios)
-
 def background_recognition():
     """
     Run speech recognition in a background thread and emit results to the client in real-time.

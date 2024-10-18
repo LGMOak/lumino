@@ -18,7 +18,7 @@
         <!-- Scenario selection button, shows a dropdown on click -->
         <button id="scenario" type="button" onclick="toggleDropdown()" class="d-flex align-items-center">
             <i class="bi bi-card-list"></i>
-            <span class="ms-2">Scenario</span>
+            <span class="ms-2">Scenario 场景</span>
             <i class="bi bi-caret-down-fill ms-2"></i>
         </button>
 
@@ -52,25 +52,18 @@
 
 
     <!-- Microphone button for starting/stopping speech recognition -->
-    <button id="mic-btn"><i class="bi bi-mic-fill"></i> Start</button>
+    <button id="mic-btn"><i class="bi bi-mic-fill"></i>Start  开始录音</button>
 
     <!-- Language switch button, displays the language that can be switched to -->
-    <button id="switch-language"><i class="bi bi-translate"></i> {{ 'Switch to Chinese' if language == 'EN' else 'Switch to English' }}</button>
+    <button id="switch-language"><i class="bi bi-translate"></i> {{ 'Switch to Chinese 中译英' if language == 'EN' else 'Switch to English 英译中h' }}</button>
 
     <!-- Clear conversation button -->
-    <button id="clearConversation"><i class="bi bi-trash-fill"></i> Clear</button>
-
-    <div class="selection">
-        <select id="dropdown" class="form-control" onchange="redirectToPage()">
-            <option value="/">EN 🇦🇺</option>
-            <option value="/zh">ZH 🇨🇳</option>
-        </select>
-    </div>
+    <button id="clearConversation"><i class="bi bi-trash-fill"></i>Clear 清空屏幕</button>
 </nav>
 
 <!-- Form to select microphone, submits automatically on change -->
 <form action="/" method="get" id="mic">
-    <label for="microphone">Select Microphone:</label>
+    <label for="microphone">Select Microphone 选择麦克风:</label>
     <select name="microphone" id="microphone" onchange="this.form.submit()">
         {% for mic in mics %}
         <option value="{{ loop.index0 }}" {% if mic == mic_name %} selected {% endif %}>{{ mic }}</option>
@@ -115,11 +108,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!recognitionStarted) {
             socket.emit('start_recognition');
             recognitionStarted = true;
-            micBtn.innerHTML = '<i class="bi bi-stop-fill"></i> Stop';
+            micBtn.innerHTML = '<i class="bi bi-stop-fill"></i>Stop 结束录音';
         } else {
             socket.emit('stop_recognition');
             recognitionStarted = false;
-            micBtn.innerHTML = '<i class="bi bi-mic-fill"></i> Start';
+            micBtn.innerHTML = '<i class="bi bi-mic-fill"></i>Start 开始录音';
             currentMessageContainer = null; // Reset current message container when stopping
         }
     });
@@ -133,10 +126,10 @@ document.addEventListener('DOMContentLoaded', function() {
     socket.on('language_switched', function(data) {
         const switchButton = document.getElementById('switch-language');
         if (data.new_language == 'EN') {
-            switchButton.innerHTML = '<i class="bi bi-translate"></i> Switch to Chinese';
+            switchButton.innerHTML = '<i class="bi bi-translate"></i>Switch to Chinese 中译英';
             currentLanguage = 'EN';
         } else {
-            switchButton.innerHTML = '<i class="bi bi-translate"></i> Switch to English';
+            switchButton.innerHTML = '<i class="bi bi-translate"></i>Switch to English 英译中';
             currentLanguage = 'ZH';
         }
 
@@ -284,15 +277,6 @@ document.addEventListener('DOMContentLoaded', function() {
         button.innerHTML = '<i class="bi bi-card-list"></i> ' + selectedContext + ' <i class="bi bi-caret-down-fill"></i>';
     }
 });
-
-function redirectToPage() {
-        const dropdown = document.getElementById("dropdown");
-        const selectedValue = dropdown.value;
-        if (selectedValue) {
-            window.location.href = selectedValue;
-        }
-    }
-    
 </script>
 
 {% endblock %}
